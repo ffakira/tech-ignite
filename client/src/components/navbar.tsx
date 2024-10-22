@@ -1,5 +1,7 @@
 export function Navbar() {
-  <nav>
-    <div>Navbar</div>
-  </nav>;
+  return (
+    <nav className="shadow-lg h-20 flex items-center">
+      <div>Navbar</div>
+    </nav>
+  );
 }
