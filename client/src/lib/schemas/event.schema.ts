@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { parseDateString } from "../utils";
 
 export const eventSchema = z
   .object({
@@ -12,12 +13,24 @@ export const eventSchema = z
         message: "Invalid price, miparseFloat(val)nimum zero (0) dollars",
       })
       .transform((val) => val * 100),
-    startDate: z.date().refine((date) => date > new Date(), {
-      message: "Start date must be in the future",
-    }),
-    endDate: z.date(),
+    startDate: z.string().refine(
+      (dateString) => {
+        const date = parseDateString(dateString);
+        return date instanceof Date && !isNaN(date.getTime());
+      },
+      { message: "Invalid date format, must be in the format dd/mm/yyyy" }
+    ),
+    endDate: z.string().refine(
+      (dateString) => {
+        const date = parseDateString(dateString);
+        return date instanceof Date && !isNaN(date.getTime());
+      },
+      { message: "Invalid date format, must be in the format dd/mm/yyyy" }
+    ),
   })
-  .refine((data) => data.endDate > data.startDate, {
-    message: "End date must be greater than start date",
-    path: ["endDate"],
+  .refine((data) => {
+    const startDate = parseDateString(data.startDate);
+    const endDate = parseDateString(data.endDate);
+
+    return endDate > startDate;
   });
