@@ -3,11 +3,11 @@ import { Navbar } from "@/components/navbar";
 
 export function RooLayout() {
   return (
-    <div>
+    <main className="grid h-dvh grid-rows-[auto,1fr]">
       <Navbar />
-      <main>
+      <div className="mx-20 h-[calc(100dvh-theme(spacing.14))] pt-4">
         <Outlet />
-      </main>
-    </div>
+      </div>
+    </main>
   );
 }
