@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { parseDateString } from "../utils";
+import { parseDateString } from "@/lib/utils";
 
 export const eventSchema = z
   .object({
@@ -8,9 +8,15 @@ export const eventSchema = z
       .min(3, { message: "Title is too short, minimum 3 characters" })
       .max(255, { message: "Title is too long, maximum 255 characters" }),
     price: z
-      .number()
+      .number({
+        required_error: "Price is required",
+        invalid_type_error: "Price must be a number",
+      })
       .min(0, {
-        message: "Invalid price, miparseFloat(val)nimum zero (0) dollars",
+        message: "Invalid price, minimum zero (0) dollars",
+      })
+      .refine((x) => x * 100 - Math.trunc(x * 100) < Number.EPSILON, {
+        message: "Price must have at most two decimal places",
       })
       .transform((val) => val * 100),
     startDate: z.string().refine(

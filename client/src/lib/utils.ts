@@ -1,6 +1,9 @@
-/**
- * @TODO integrate clsx
- */
+import { ClassValue, clsx } from "clsx";
+import { twMerge } from "tailwind-merge";
+
+export function cn(...inputs: ClassValue[]) {
+  return twMerge(clsx(inputs));
+}
 
 export function parseDateString(date: string) {
   /** @dev regex date format dd/mm/yyyy */
