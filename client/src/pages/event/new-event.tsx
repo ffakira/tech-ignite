@@ -50,18 +50,15 @@ export function NewEventPage() {
     resolver: zodResolver(eventSchema),
     defaultValues: {
       title: "",
-      startDate: new Intl.DateTimeFormat("en-GB").format(new Date()),
-      endDate: new Intl.DateTimeFormat("en-GB").format(new Date()),
-      price: undefined,
+      startDate: "",
+      endDate: "",
+      price: 0,
     },
   });
 
-  /**
-   * @TODO integrate form submisstion
-   */
-  const handleSubmit = form.handleSubmit((data) => {
+  const submit = form.handleSubmit((data) => {
     // Handle form submission
-    console.log(data);
+    console.log("test", data);
 
     toast.success("Event created successfully", {
       id: toastId,
@@ -72,7 +69,7 @@ export function NewEventPage() {
   return (
     <div className="space-y-8">
       <h1 className="text-2xl font-semibold">Create Event</h1>
-      <form className="shadow-lg px-4 py-2 pb-4" onSubmit={handleSubmit}>
+      <form onSubmit={submit} className="shadow-lg px-4 py-2 pb-4">
         <fieldset className="space-y-4">
           <Controller
             control={form.control}
@@ -140,7 +137,7 @@ export function NewEventPage() {
                         {...field}
                         onChange={(e) => {
                           if (e.target.value.length === 0) {
-                            return;
+                            form.setValue(field.name, 0);
                           }
 
                           const value = parseFloat(e.target.value);
@@ -162,7 +159,7 @@ export function NewEventPage() {
             <Controller
               control={form.control}
               name="startDate"
-              render={({ field }) => {
+              render={({ field, fieldState }) => {
                 return (
                   <div className="space-y-1.5">
                     <Label
@@ -245,6 +242,11 @@ export function NewEventPage() {
                         </Popover>
                       </DialogTrigger>
                     </Group>
+                    {fieldState.error && (
+                      <p className="text-red-500 text-sm italic">
+                        {fieldState.error.message}
+                      </p>
+                    )}
                   </div>
                 );
               }}
@@ -350,7 +352,7 @@ export function NewEventPage() {
               }}
             />
           </div>
-          <Button className={button({ class: "float-end" })} type="submit">
+          <Button type="submit" className={button({ class: "float-end" })}>
             Create Event
           </Button>
         </fieldset>

@@ -11,13 +11,13 @@ export function parseDateString(date: string) {
     /^(0[1-9]|[12][0-9]|3[01])\/(0[1-9]|1[0-2])\/(0[1-9]\d{3}|[1-9]\d{3})$/;
 
   if (!regexDate.test(date)) {
-    throw new Error("Invalid date format, must be in the format dd/mm/yyyy");
+    return false;
   }
 
   const splitDate = date.split("/");
 
   if (splitDate.length !== 3) {
-    throw new Error("Invalid date format, must be in the format dd/mm/yyyy");
+    return false;
   }
 
   const [day, month, year] = splitDate.map((val) => parseInt(val));

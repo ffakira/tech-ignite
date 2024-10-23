@@ -14,24 +14,37 @@ export const baseEventSchema = z.object({
     .min(0, {
       message: "Invalid price, minimum zero (0) dollars",
     })
-    .refine((x) => x * 100 - Math.trunc(x * 100) < Number.EPSILON, {
+    .refine((x) => /^\d+(\.\d{1,2})?$/.test(x.toString()), {
       message: "Price must have at most two decimal places",
+      path: ["price"],
     })
     .transform((val) => val * 100),
-  startDate: z.string().refine(
-    (dateString) => {
-      const date = parseDateString(dateString);
-      return date instanceof Date && !isNaN(date.getTime());
-    },
-    { message: "Invalid date format, must be in the format dd/mm/yyyy" }
-  ),
-  endDate: z.string().refine(
-    (dateString) => {
-      const date = parseDateString(dateString);
-      return date instanceof Date && !isNaN(date.getTime());
-    },
-    { message: "Invalid date format, must be in the format dd/mm/yyyy" }
-  ),
+  startDate: z
+    .string()
+    .min(1, { message: "Start date is required" })
+    .refine(
+      (dateString) => {
+        const date = parseDateString(dateString);
+        return date !== false;
+      },
+      {
+        message: "Invalid date format, must be in the format dd/mm/yyyy",
+        path: ["startDate"],
+      }
+    ),
+  endDate: z
+    .string()
+    .min(1, { message: "End date is required" })
+    .refine(
+      (dateString) => {
+        const date = parseDateString(dateString);
+        return date !== false;
+      },
+      {
+        message: "Invalid date format, must be in the format dd/mm/yyyy",
+        path: ["endDate"],
+      }
+    ),
 });
 
 export const eventSchema = baseEventSchema.refine(
@@ -41,12 +54,14 @@ export const eventSchema = baseEventSchema.refine(
 
     return endDate > startDate;
   },
-  { message: "End date must be after start date" }
+  { message: "End date must be after start date", path: ["endDate"] }
 );
 
 export const eventUpdateSchema = baseEventSchema.extend({
   id: z.string(),
-  status: z.enum(["started", "completed", "paused"]),
+  status: z.enum(["started", "completed", "paused"], {
+    message: "Invalid status",
+  }),
 });
 
 export const eventDeleteSchema = z.object({
