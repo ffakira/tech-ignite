@@ -34,9 +34,17 @@ import {
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 
+/**
+ * @TODO migrate calendar components to its own component
+ * @TODO integrate react-hook-form context provider
+ */
 export function NewEventPage() {
   const toastId = "event:created";
   const onDateChangeToastId = "event:date-changed";
+
+  /**
+   * @TODO integrate useNewEventMutation hook
+   */
 
   const form = useForm<z.output<typeof eventSchema>>({
     resolver: zodResolver(eventSchema),
@@ -44,10 +52,13 @@ export function NewEventPage() {
       title: "",
       startDate: new Intl.DateTimeFormat("en-GB").format(new Date()),
       endDate: new Intl.DateTimeFormat("en-GB").format(new Date()),
-      price: 0,
+      price: undefined,
     },
   });
 
+  /**
+   * @TODO integrate form submisstion
+   */
   const handleSubmit = form.handleSubmit((data) => {
     // Handle form submission
     console.log(data);
@@ -241,92 +252,99 @@ export function NewEventPage() {
             <Controller
               control={form.control}
               name="endDate"
-              render={({ field }) => {
+              render={({ field, fieldState }) => {
                 return (
-                  <div className="relative space-y-1.5">
+                  <div className="relative space-y-2">
                     <Label
                       className="font-semibold text-stone-700"
                       htmlFor={field.name}
                     >
                       End Date
                     </Label>
-                    <Group className="relative flex border rounded-md px-2 py-1.5">
-                      <Input
-                        className="flex-1 text-stone-700 -my-1.5 w-full bg-transparent focus:outline-none"
-                        placeholder="End Date"
-                        {...field}
-                      />
-                      <DialogTrigger>
-                        <Button
-                          className={button({
-                            class: "rounded-l-none -mr-2 -my-1.5",
-                          })}
-                        >
-                          <CalendarIcon
-                            className="shrink-0 size-4"
-                            aria-label="Start date"
-                          />
-                        </Button>
-                        <Popover className="absolute left-0">
-                          <Dialog className="bg-white border rounded-md shadow-lg p-4 focus:outline-none">
-                            {({ close }) => (
-                              <Calendar
-                                aria-label="End date"
-                                minValue={today(getLocalTimeZone())}
-                                onChange={(data) => {
-                                  const date = `${data.day}/${data.month}/${data.year}`;
-                                  form.setValue("endDate", date);
-                                  toast.info(`End date changed: ${date}`, {
-                                    id: onDateChangeToastId,
-                                    duration: 3000,
-                                  });
-                                  close();
-                                }}
-                              >
-                                <header className="flex w-full justify-between gap-4 mb-4">
-                                  <Button
-                                    className={calendarHeaderButton()}
-                                    slot="previous"
-                                  >
-                                    <ChevronLeftIcon
-                                      className="group-data-[disabled]:text-gray-400"
-                                      aria-label="Previous month"
-                                    />
-                                  </Button>
-                                  <Heading className={calendarHeading()} />
-                                  <Button
-                                    className={calendarHeaderButton()}
-                                    slot="next"
-                                  >
-                                    <ChevronRightIcon
-                                      className="group-data-[disabled]:text-gray-400"
-                                      aria-label="Next month"
-                                    />
-                                  </Button>
-                                </header>
-                                <CalendarGrid>
-                                  <CalendarGridHeader>
-                                    {(day) => (
-                                      <CalendarHeaderCell>
-                                        {day}
-                                      </CalendarHeaderCell>
-                                    )}
-                                  </CalendarGridHeader>
-                                  <CalendarGridBody>
-                                    {(date) => (
-                                      <CalendarCell
-                                        className={calendarCell()}
-                                        date={date}
+                    <div className="space-y-1">
+                      <Group className="relative flex border rounded-md px-2 py-1.5">
+                        <Input
+                          className="flex-1 text-stone-700 -my-1.5 w-full bg-transparent focus:outline-none"
+                          placeholder="End Date"
+                          {...field}
+                        />
+                        <DialogTrigger>
+                          <Button
+                            className={button({
+                              class: "rounded-l-none -mr-2 -my-1.5",
+                            })}
+                          >
+                            <CalendarIcon
+                              className="shrink-0 size-4"
+                              aria-label="Start date"
+                            />
+                          </Button>
+                          <Popover className="absolute left-0">
+                            <Dialog className="bg-white border rounded-md shadow-lg p-4 focus:outline-none">
+                              {({ close }) => (
+                                <Calendar
+                                  aria-label="End date"
+                                  minValue={today(getLocalTimeZone())}
+                                  onChange={(data) => {
+                                    const date = `${data.day}/${data.month}/${data.year}`;
+                                    form.setValue("endDate", date);
+                                    toast.info(`End date changed: ${date}`, {
+                                      id: onDateChangeToastId,
+                                      duration: 3000,
+                                    });
+                                    close();
+                                  }}
+                                >
+                                  <header className="flex w-full justify-between gap-4 mb-4">
+                                    <Button
+                                      className={calendarHeaderButton()}
+                                      slot="previous"
+                                    >
+                                      <ChevronLeftIcon
+                                        className="group-data-[disabled]:text-gray-400"
+                                        aria-label="Previous month"
                                       />
-                                    )}
-                                  </CalendarGridBody>
-                                </CalendarGrid>
-                              </Calendar>
-                            )}
-                          </Dialog>
-                        </Popover>
-                      </DialogTrigger>
-                    </Group>
+                                    </Button>
+                                    <Heading className={calendarHeading()} />
+                                    <Button
+                                      className={calendarHeaderButton()}
+                                      slot="next"
+                                    >
+                                      <ChevronRightIcon
+                                        className="group-data-[disabled]:text-gray-400"
+                                        aria-label="Next month"
+                                      />
+                                    </Button>
+                                  </header>
+                                  <CalendarGrid>
+                                    <CalendarGridHeader>
+                                      {(day) => (
+                                        <CalendarHeaderCell>
+                                          {day}
+                                        </CalendarHeaderCell>
+                                      )}
+                                    </CalendarGridHeader>
+                                    <CalendarGridBody>
+                                      {(date) => (
+                                        <CalendarCell
+                                          className={calendarCell()}
+                                          date={date}
+                                        />
+                                      )}
+                                    </CalendarGridBody>
+                                  </CalendarGrid>
+                                </Calendar>
+                              )}
+                            </Dialog>
+                          </Popover>
+                        </DialogTrigger>
+                      </Group>
+                      {fieldState.error && (
+                        <p className="text-red-500 text-sm italic">
+                          {fieldState.error.message}
+                        </p>
+                      )}
+                    </div>
                   </div>
                 );
               }}
