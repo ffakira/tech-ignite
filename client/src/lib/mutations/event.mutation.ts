@@ -9,6 +9,7 @@ import {
   eventUpdateSchema,
 } from "@/lib/schemas/event.schema";
 import { z } from "zod";
+import { parseDateString } from "@/lib/utils";
 
 export function useCreateEventMutation() {
   return useMutation({
@@ -21,6 +22,9 @@ export function useCreateEventMutation() {
       }
 
       try {
+        const startDate = parseDateString(result.data.startDate) as Date;
+        const endDate = parseDateString(result.data.endDate) as Date;
+
         const response = await fetch(
           `${import.meta.env.VITE_API_V1_URL}/events/new`,
           {
@@ -28,16 +32,24 @@ export function useCreateEventMutation() {
             headers: {
               "Content-Type": "application/json",
               Accept: "application/json",
-              body: JSON.stringify(result.data),
             },
+            body: JSON.stringify({
+              ...result.data,
+              startDate: Math.floor(startDate.valueOf() / 1000),
+              endDate: Math.floor(endDate.valueOf() / 1000),
+            }),
           }
         );
 
-        if (!response.ok) {
-          return { status: "error", errors: ["An error occurred"] } as const;
-        }
+        // if (!response.ok) {
+        //   return { status: "error", errors: ["An error occurred"] } as const;
+        // }
 
         const data = await response.json();
+
+        if (data.status === 400) {
+          return { status: "error", errors: "Bad request" } as const;
+        }
 
         return { status: "success", data } as const;
       } catch (error) {
@@ -66,8 +78,8 @@ export function useUpdateEventMutation() {
             headers: {
               "Content-Type": "application/json",
               Accept: "application/json",
-              body: JSON.stringify(result.data),
             },
+            body: JSON.stringify(result.data),
           }
         );
 

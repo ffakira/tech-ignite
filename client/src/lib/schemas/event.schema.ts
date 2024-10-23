@@ -1,4 +1,5 @@
 import { z } from "zod";
+import Decimal from "decimal.js";
 import { parseDateString } from "@/lib/utils";
 
 export const baseEventSchema = z.object({
@@ -18,7 +19,7 @@ export const baseEventSchema = z.object({
       message: "Price must have at most two decimal places",
       path: ["price"],
     })
-    .transform((val) => val * 100),
+    .transform((val) => new Decimal(val).times(100).toNumber()),
   startDate: z
     .string()
     .min(1, { message: "Start date is required" })

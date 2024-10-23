@@ -33,6 +33,7 @@ import {
 } from "@/components/ui/calendar";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+import { useCreateEventMutation } from "@/lib/mutations/event.mutation";
 
 /**
  * @TODO migrate calendar components to its own component
@@ -42,11 +43,10 @@ export function NewEventPage() {
   const toastId = "event:created";
   const onDateChangeToastId = "event:date-changed";
 
-  /**
-   * @TODO integrate useNewEventMutation hook
-   */
+  const createEventMutation = useCreateEventMutation();
 
   const form = useForm<z.output<typeof eventSchema>>({
+    disabled: createEventMutation.isPending,
     resolver: zodResolver(eventSchema),
     defaultValues: {
       title: "",
@@ -60,9 +60,23 @@ export function NewEventPage() {
     // Handle form submission
     console.log("test", data);
 
-    toast.success("Event created successfully", {
-      id: toastId,
-      duration: 3000,
+    createEventMutation.mutate(data, {
+      onSuccess: (data) => {
+        console.log(data);
+        form.reset();
+
+        toast.success("Event created successfully", {
+          id: toastId,
+          duration: 3000,
+        });
+      },
+      onError: (error) => {
+        console.error(error);
+        toast.error("An error occurred while creating the event", {
+          id: toastId,
+          duration: 3000,
+        });
+      },
     });
   });
 
@@ -352,7 +366,11 @@ export function NewEventPage() {
               }}
             />
           </div>
-          <Button type="submit" className={button({ class: "float-end" })}>
+          <Button
+            type="submit"
+            isDisabled={createEventMutation.isPending}
+            className={button({ class: "float-end" })}
+          >
             Create Event
           </Button>
         </fieldset>
