@@ -35,15 +35,15 @@ BEGIN
         THEN RAISE(ABORT, 'error: events.status must be one of the following: started | completed | paused')
 
         -- Validate events.start_date column
-        WHEN strftime('%s', substr(NEW.start_date, 7, 4) || '-' || substr(NEW.start_date, 4, 2) || '-' || substr(NEW.start_date, 1, 2)) IS NULL
-        THEN RAISE(ABORT, 'error: events.start_date format expected dd/mm/yyyy')
+        WHEN NEW.start_date < 0
+        THEN RAISE(ABORT, 'error: events.start_date must be a positive integer')
 
         -- Validate events.end_date column
-        WHEN strftime('%s', substr(NEW.end_date, 7, 4) || '-' || substr(NEW.end_date, 4, 2) || '-' || substr(NEW.end_date, 1, 2)) IS NULL
-        THEN RAISE(ABORT, 'error: events.end_date format expected dd/mm/yyyy')
+        WHEN NEW.end_date < 0
+        THEN RAISE(ABORT, 'error: events.end_date must be a positive integer')
 
         -- Validate events.start_date < events.end_date columns
-        WHEN strftime('%s', substr(NEW.start_date, 7, 4) || '-' || substr(NEW.start_date, 4, 2) || '-' || substr(NEW.start_date, 1, 2)) >= strftime('%s', substr(NEW.end_date, 7, 4) || '-' || substr(NEW.end_date, 4, 2) || '-' || substr(NEW.end_date, 1, 2))
+        WHEN NEW.start_date >= NEW.end_date
         THEN RAISE(ABORT, 'error: events.start_date should be less than events.end_date')
     END;
 END;
@@ -68,15 +68,15 @@ BEGIN
         THEN RAISE(ABORT, 'error: events.status must be one of the following: started | completed | paused')
 
         -- Validate events.start_date column
-        WHEN strftime('%s', substr(NEW.start_date, 7, 4) || '-' || substr(NEW.start_date, 4, 2) || '-' || substr(NEW.start_date, 1, 2)) IS NULL
-        THEN RAISE(ABORT, 'error: events.start_date format expected dd/mm/yyyy')
+        WHEN NEW.start_date < 0
+        THEN RAISE(ABORT, 'error: events.start_date must be a positive integer')
 
         -- Validate events.end_date column
-        WHEN strftime('%s', substr(NEW.end_date, 7, 4) || '-' || substr(NEW.end_date, 4, 2) || '-' || substr(NEW.end_date, 1, 2)) IS NULL
-        THEN RAISE(ABORT, 'error: events.end_date format expected dd/mm/yyyy')
+        WHEN NEW.end_date < 0
+        THEN RAISE(ABORT, 'error: events.end_date must be a positive integer')
 
         -- Validate events.start_date < events.end_date columns
-        WHEN strftime('%s', substr(NEW.start_date, 7, 4) || '-' || substr(NEW.start_date, 4, 2) || '-' || substr(NEW.start_date, 1, 2)) >= strftime('%s', substr(NEW.end_date, 7, 4) || '-' || substr(NEW.end_date, 4, 2) || '-' || substr(NEW.end_date, 1, 2))
+        WHEN NEW.start_date >= NEW.end_date
         THEN RAISE(ABORT, 'error: events.start_date should be less than events.end_date')
     END;
 END;
