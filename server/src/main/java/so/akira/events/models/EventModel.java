@@ -4,22 +4,22 @@ public class EventModel {
     private String title;
     private int price;
     private String status;
-    private String startDate;
-    private String endDate;
+    private int startDate;
+    private int endDate;
     private int createdAt;
     private int updatedAt;
 
     public EventModel() {
     }
 
-    public EventModel(String title, int price, String startDate, String endDate) {
+    public EventModel(String title, int price, int startDate, int endDate) {
         this.title = title;
         this.price = price;
         this.startDate = startDate;
         this.endDate = endDate;
     }
 
-    public EventModel(String title, int price, String status, String startDate, String endDate, int updatedAt) {
+    public EventModel(String title, int price, String status, int startDate, int endDate, int updatedAt) {
         this.title = title;
         this.price = price;
         this.status = status;
@@ -28,7 +28,7 @@ public class EventModel {
         this.updatedAt = updatedAt;
     }
 
-    public EventModel(String title, int price, String status, String startDate, String endDate, int createdAt,
+    public EventModel(String title, int price, String status, int startDate, int endDate, int createdAt,
             int updatedAt) {
         this.title = title;
         this.price = price;
@@ -63,19 +63,19 @@ public class EventModel {
         this.status = status;
     }
 
-    public String getStartDate() {
+    public int getStartDate() {
         return startDate;
     }
 
-    public void setStartDate(String startDate) {
+    public void setStartDate(int startDate) {
         this.startDate = startDate;
     }
 
-    public String getEndDate() {
+    public int getEndDate() {
         return endDate;
     }
 
-    public void setEndDate(String endDate) {
+    public void setEndDate(int endDate) {
         this.endDate = endDate;
     }
 
