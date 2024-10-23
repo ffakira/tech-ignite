@@ -12,6 +12,49 @@
 
 ### API Documentation
 
+#### GET `api/v1/events/{id}`
+
+**Description:**
+Get an event by id
+
+**Request Parameters:**
+- `id`: unsigned integer
+
+**Request Body:**
+None
+
+**Response Status:**
+<table>
+  <thead>
+    <th>Status</th>
+    <th>Description</th>
+  </thead>
+  <tbody>
+    <tr>
+      <td>200</td>
+      <td>One event fetched by id</td>
+    </tr>
+    <tr>
+      <td>400</td>
+      <td>Malformed data from the client side</td>
+    </tr>
+    <tr>
+      <td>404</td>
+      <td>Event not found</td>
+    </tr>
+    <tr>
+      <td>500</td>
+      <td>Internal server error</td>
+    </tr>
+  </tbody>
+</table>
+
+**Example:**
+```sh
+$ curl -X GET http://localhost:8080/api/v1/events/9821 \
+-H "Accept: application/json"
+```
+
 #### POST `/api/v1/events/new`
 
 **Description:**
