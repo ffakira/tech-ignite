@@ -118,6 +118,7 @@
 							<generator>
 								<database>
 									<name>org.jooq.meta.sqlite.SQLiteDatabase</name>
+									<includes>.*</includes>
 									<excludes>flyway_schema_history|sqlite_sequence</excludes>
 								</database>
 								<target>
