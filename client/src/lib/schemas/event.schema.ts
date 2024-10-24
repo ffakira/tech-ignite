@@ -1,12 +1,12 @@
 import { z } from "zod";
-import Decimal from "decimal.js";
 import { parseDateString } from "@/lib/utils";
 
 export const baseEventSchema = z.object({
   title: z
     .string()
     .min(3, { message: "Title is too short, minimum 3 characters" })
-    .max(255, { message: "Title is too long, maximum 255 characters" }),
+    .max(255, { message: "Title is too long, maximum 255 characters" })
+    .transform((val) => val.trim()),
   price: z
     .number({
       required_error: "Price is required",
@@ -18,8 +18,7 @@ export const baseEventSchema = z.object({
     .refine((x) => /^\d+(\.\d{1,2})?$/.test(x.toString()), {
       message: "Price must have at most two decimal places",
       path: ["price"],
-    })
-    .transform((val) => new Decimal(val).times(100).toNumber()),
+    }),
   startDate: z
     .string()
     .min(1, { message: "Start date is required" })
@@ -48,6 +47,8 @@ export const baseEventSchema = z.object({
     ),
 });
 
+export type Event = z.infer<typeof baseEventSchema> & { id: number };
+
 export const eventSchema = baseEventSchema.refine(
   (data) => {
     const startDate = parseDateString(data.startDate);
@@ -59,12 +60,12 @@ export const eventSchema = baseEventSchema.refine(
 );
 
 export const eventUpdateSchema = baseEventSchema.extend({
-  id: z.string(),
+  id: z.number().min(1, { message: "Invalid event ID" }),
   status: z.enum(["started", "completed", "paused"], {
     message: "Invalid status",
   }),
 });
 
 export const eventDeleteSchema = z.object({
-  eventId: z.string(),
+  id: z.number().min(1, { message: "Invalid event ID" }),
 });

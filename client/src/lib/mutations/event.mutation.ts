@@ -1,7 +1,3 @@
-/**
- * @TODO implement mutations for events
- */
-
 import { useMutation } from "@tanstack/react-query";
 import {
   eventDeleteSchema,
@@ -10,6 +6,7 @@ import {
 } from "@/lib/schemas/event.schema";
 import { z } from "zod";
 import { parseDateString } from "@/lib/utils";
+import Decimal from "decimal.js";
 
 export function useCreateEventMutation() {
   return useMutation({
@@ -24,6 +21,7 @@ export function useCreateEventMutation() {
       try {
         const startDate = parseDateString(result.data.startDate) as Date;
         const endDate = parseDateString(result.data.endDate) as Date;
+        const price = new Decimal(result.data.price).times(100).toNumber();
 
         const response = await fetch(
           `${import.meta.env.VITE_API_V1_URL}/events/new`,
@@ -37,6 +35,7 @@ export function useCreateEventMutation() {
               ...result.data,
               startDate: Math.floor(startDate.valueOf() / 1000),
               endDate: Math.floor(endDate.valueOf() / 1000),
+              price,
             }),
           }
         );
@@ -70,6 +69,18 @@ export function useUpdateEventMutation() {
         return { status: "error", errors: result.error.errors } as const;
       }
 
+      /**
+       * @dev once the zod validates the date format, transform to Date object
+       * and convert to unix timestamp in seconds
+       */
+      const startDate = parseDateString(result.data.startDate) as Date;
+      const endDate = parseDateString(result.data.endDate) as Date;
+
+      /**
+       * @dev zod transform utlity was
+       */
+      const price = new Decimal(result.data.price).times(100).toNumber();
+
       try {
         const response = await fetch(
           `${import.meta.env.VITE_API_V1_URL}/events/${result.data.id}`,
@@ -79,7 +90,12 @@ export function useUpdateEventMutation() {
               "Content-Type": "application/json",
               Accept: "application/json",
             },
-            body: JSON.stringify(result.data),
+            body: JSON.stringify({
+              ...result.data,
+              startDate: Math.floor(startDate.valueOf() / 1000),
+              endDate: Math.floor(endDate.valueOf() / 1000),
+              price,
+            }),
           }
         );
 
@@ -110,11 +126,10 @@ export function useDeleteEventMutation() {
 
       try {
         const response = await fetch(
-          `${import.meta.env.VITE_API_V1_URL}/events/${result.data.eventId}`,
+          `${import.meta.env.VITE_API_V1_URL}/events/${result.data.id}`,
           {
             method: "DELETE",
             headers: {
-              "Content-Type": "application/json",
               Accept: "application/json",
             },
           }

@@ -50,9 +50,9 @@ export function useEventsQuery(options?: QueryOptions) {
         }
 
         const data = await response.json();
+        console.log(data);
         return { status: "success", data } as const;
       } catch (error) {
-        console.error(error);
         return { status: "error", errors: ["Internal server error"] } as const;
       }
     },
