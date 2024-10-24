@@ -1,6 +1,5 @@
 package so.akira.events.controllers;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -26,6 +25,11 @@ public class EventController {
         this.eventService = eventService;
     }
 
+    @GetMapping("/")
+    public ResponseEntity<?> getEvents() {
+        return ResponseEntity.status(HttpStatus.OK).body(eventService.getEvents());
+    }
+
     @GetMapping("/{id}")
     public ResponseEntity<?> getEvent(@PathVariable int id) {
         if (id <= 0) {
@@ -34,13 +38,7 @@ public class EventController {
         }
 
         EventModel event = eventService.getEventById(id);
-
-        if (event != null) {
-            return ResponseEntity.status(HttpStatus.OK).body(event);
-        } else {
-            StatusResponse statusResponse = new StatusResponse("error", "Event not found");
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(statusResponse);
-        }
+        return ResponseEntity.status(HttpStatus.OK).body(event);
     }
 
     @PostMapping("/new")
@@ -56,15 +54,8 @@ public class EventController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(statusResponse);
         }
 
-        EventModel eventModel = eventService.getEventById(id);
-
-        if (eventModel != null) {
-            eventService.updateEvent(id, event);
-            return ResponseEntity.status(HttpStatus.OK).body(event);
-        } else {
-            StatusResponse statusResponse = new StatusResponse("error", "Event not found");
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(statusResponse);
-        }
+        eventService.updateEvent(id, event);
+        return ResponseEntity.status(HttpStatus.OK).body(event);
     }
 
     @DeleteMapping("/{id}")
@@ -74,14 +65,7 @@ public class EventController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(statusResponse);
         }
 
-        EventModel eventModel = eventService.getEventById(id);
-
-        if (eventModel != null) {
-            eventService.deleteEvent(id);
-            return ResponseEntity.status(HttpStatus.OK).body(eventModel);
-        } else {
-            StatusResponse statusResponse = new StatusResponse("error", "Event not found");
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(statusResponse);
-        }
+        eventService.deleteEvent(id);
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 }
