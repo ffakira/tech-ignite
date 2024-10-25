@@ -104,6 +104,7 @@ export function useUpdateEventMutation() {
         }
 
         const data = await response.json();
+        console.log("update mutation", data);
 
         return { status: "success", data } as const;
       } catch (error) {
