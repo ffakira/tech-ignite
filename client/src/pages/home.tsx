@@ -97,7 +97,7 @@ function EditDialogTrigger({
   const toastDeleteId = "event:delete";
 
   const [edit, setEdit] = useState(false);
-  const [osOpen, setIsOpen] = useState(false);
+  const [, setIsOpen] = useState(false);
 
   const deleteEventMutation = useDeleteEventMutation();
   const updateEventMutation = useUpdateEventMutation();
@@ -120,6 +120,8 @@ function EditDialogTrigger({
       status: event.status,
     },
   });
+
+  console.log(form.formState.errors);
 
   const handleOnClose = () => {
     if (deleteEventMutation.isPending || updateEventMutation.isPending) {
@@ -153,8 +155,6 @@ function EditDialogTrigger({
     );
   };
 
-  console.log("errors:", form.formState.errors);
-
   const submit = form.handleSubmit((data) => {
     if (deleteEventMutation.isPending || updateEventMutation.isPending) {
       return;
@@ -170,6 +170,7 @@ function EditDialogTrigger({
           id: toastUpdateId,
           duration: 3000,
         });
+        setIsOpen(false);
       },
       onError(data) {
         console.log(data);
@@ -271,8 +272,18 @@ function EditDialogTrigger({
                                   Price
                                 </Label>
                                 <Input
+                                  type="number"
                                   className="w-full border px-1.5 py-2 rounded-md focus:outline-none"
+                                  placeholder="0.00"
                                   {...field}
+                                  onChange={(e) => {
+                                    if (e.target.value.length === 0) {
+                                      form.setValue(field.name, 0);
+                                    }
+
+                                    const value = parseFloat(e.target.value);
+                                    form.setValue(field.name, value);
+                                  }}
                                 />
                               </div>
                             );
@@ -295,9 +306,15 @@ function EditDialogTrigger({
                                   name={field.name}
                                   className="relative"
                                   selectedKey={field.value}
-                                  onChange={(val) => {
-                                    console.log(val);
-                                  }}
+                                  onSelectionChange={(value) =>
+                                    form.setValue(
+                                      field.name,
+                                      value as
+                                        | "started"
+                                        | "completed"
+                                        | "paused"
+                                    )
+                                  }
                                 >
                                   <Button className="border rounded-md p-2 flex w-full">
                                     <SelectValue />
