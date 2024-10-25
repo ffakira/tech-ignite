@@ -3,7 +3,10 @@ package so.akira.events.repositories;
 import org.jooq.DSLContext;
 import org.jooq.exception.DataAccessException;
 import org.jooq.exception.NoDataFoundException;
+import org.jooq.impl.DSL;
 import org.springframework.stereotype.Repository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.sqlite.SQLiteErrorCode;
 import org.sqlite.SQLiteException;
 
@@ -17,6 +20,8 @@ import java.util.List;
 
 @Repository
 public class EventRepository {
+
+    private static final Logger logger = LoggerFactory.getLogger(EventRepository.class);
     private final DSLContext db;
 
     public EventRepository(DSLContext db) {
@@ -71,11 +76,14 @@ public class EventRepository {
 
     public void updateEvent(int id, EventModel event) throws SQLIntegrityConstraintViolationException {
         try {
+            logger.debug("Updating event with id: {}", id);
             db.update(EVENTS)
                     .set(EVENTS.TITLE, event.getTitle())
                     .set(EVENTS.PRICE, event.getPrice())
+                    .set(EVENTS.STATUS, event.getStatus())
                     .set(EVENTS.START_DATE, event.getStartDate())
                     .set(EVENTS.END_DATE, event.getEndDate())
+                    .set(EVENTS.UPDATED_AT, DSL.field("strftime('%s', 'now')", Integer.class))
                     .where(EVENTS.ID.eq(id))
                     .execute();
         } catch (DataAccessException e) {

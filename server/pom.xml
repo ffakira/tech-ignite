@@ -88,7 +88,7 @@
 				<artifactId>flyway-maven-plugin</artifactId>
 				<version>10.10.0</version>
 				<configuration>
-					<url>jdbc:sqlite:file:app.events-dev.db</url>
+					<url>jdbc:sqlite:file:data/app.events-dev.db</url>
 					<user></user>
 					<password></password>
 					<locations>
@@ -111,7 +111,7 @@
 						<configuration>
 							<jdbc>
 								<driver>org.sqlite.JDBC</driver>
-								<url>jdbc:sqlite:file:app.events-dev.db</url>
+								<url>jdbc:sqlite:file:data/app.events-dev.db</url>
 								<user></user>
 								<password></password>
 							</jdbc>

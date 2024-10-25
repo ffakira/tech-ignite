@@ -1,6 +1,7 @@
 package so.akira.events.models;
 
 public class EventModel {
+    private int id;
     private String title;
     private int price;
     private String status;
@@ -37,6 +38,26 @@ public class EventModel {
         this.endDate = endDate;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
+    }
+
+    public EventModel(int id, String title, int price, String status, int startDate, int endDate, int createdAt,
+            int updatedAt) {
+        this.id = id;
+        this.title = title;
+        this.price = price;
+        this.status = status;
+        this.startDate = startDate;
+        this.endDate = endDate;
+        this.createdAt = createdAt;
+        this.updatedAt = updatedAt;
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
     }
 
     public String getTitle() {

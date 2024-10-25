@@ -25,7 +25,7 @@ public class EventController {
         this.eventService = eventService;
     }
 
-    @GetMapping("/")
+    @GetMapping("")
     public ResponseEntity<?> getEvents() {
         return ResponseEntity.status(HttpStatus.OK).body(eventService.getEvents());
     }
