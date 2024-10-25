@@ -1,21 +1,28 @@
-FROM jarredsummer/bun:latest AS build
-
+# base stage with Bun
+FROM oven/bun:latest AS base
 WORKDIR /app
 
-COPY package.json bun.lockb ./
+# install node modules
+FROM base AS install
+RUN mkdir -p /temp/prod
+COPY package.json bun.lockb /temp/prod/
+RUN cd /temp/prod && bun install --frozen-lockfile
 
-RUN bun install
-
+# build for production
+FROM base AS prerelease
+WORKDIR /app
+COPY --from=install /temp/prod/node_modules ./node_modules
 COPY . .
-
+ENV NODE_ENV=production
 RUN bun run build
 
-FROM nginx:alpine
+# serve dist folder with nginx
+FROM nginx:alpine AS release
+COPY --from=prerelease /app/dist /usr/share/nginx/html
+COPY nginx.conf /etc/nginx/nginx.conf
 
-COPY --from=build /app/build /usr/share/nginx/html
+# export port 5173
+EXPOSE 5173
 
-COPY nginx.confg /etc/nginx/nginx/nginx.conf
-
-EXPOSE 80
-
+# start nginx
 CMD ["nginx", "-g", "daemon off;"]
