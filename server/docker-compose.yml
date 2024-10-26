@@ -1,0 +1,13 @@
+version: '3.8'
+
+services:
+  app:
+    image: spring-event-app:0.0.1-SNAPSHOT
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./data:/app/data
+    command: ["java", "-jar", "/app/app.jar"]
