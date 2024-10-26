@@ -130,8 +130,6 @@ function EditDialogTrigger({
     },
   });
 
-  console.log(form.formState.errors, form.watch("id"));
-
   useEffect(() => {
     form.reset({
       id: Number(event.id),
@@ -143,19 +141,17 @@ function EditDialogTrigger({
     });
   }, [event, form]);
 
-  const handleOnClose = () => {
+  const handleOnDelete = () => {
     if (deleteEventMutation.isPending || updateEventMutation.isPending) {
       return;
     }
-
-    /** @dev this should not happen */
-    form.reset();
-    setEdit(false);
 
     deleteEventMutation.mutate(
       { id: Number(event.id) },
       {
         onSuccess() {
+          queryClient.invalidateQueries({ queryKey: ["events"] });
+          setIsOpen(false);
           toast.success("Event deleted successfully", {
             id: toastDeleteId,
             duration: 3000,
@@ -436,7 +432,7 @@ function EditDialogTrigger({
                       type="button"
                       isDisabled={deleteEventMutation.isPending}
                       onPress={() => {
-                        handleOnClose();
+                        handleOnDelete();
                         if (deleteEventMutation.isSuccess) {
                           close();
                         }
