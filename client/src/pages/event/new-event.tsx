@@ -10,9 +10,6 @@ import { cn } from "@/lib/utils";
 import { useCreateEventMutation } from "@/lib/mutations/event.mutation";
 import { CalendarPicker } from "@/components/calendar-picker";
 
-/**
- * @TODO migrate calendar components to its own component
- */
 export function NewEventPage() {
   const toastId = "event:created";
 
@@ -179,7 +176,7 @@ export function NewEventPage() {
           <Button
             type="submit"
             isDisabled={createEventMutation.isPending}
-            className={button({ class: "float-end" })}
+            className={button({ class: "w-full sm:w-fit float-end" })}
           >
             Create Event
           </Button>

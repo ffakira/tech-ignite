@@ -54,17 +54,27 @@ export const eventSchema = baseEventSchema.refine(
     const startDate = parseDateString(data.startDate);
     const endDate = parseDateString(data.endDate);
 
-    return endDate > startDate;
+    return endDate >= startDate;
   },
   { message: "End date must be after start date", path: ["endDate"] }
 );
 
-export const eventUpdateSchema = baseEventSchema.extend({
-  id: z.number().min(1, { message: "Invalid event ID" }),
-  status: z.enum(["started", "completed", "paused"], {
-    message: "Invalid status",
-  }),
-});
+export const eventUpdateSchema = baseEventSchema
+  .extend({
+    id: z.number().min(1, { message: "Invalid event ID" }),
+    status: z.enum(["started", "completed", "paused"], {
+      message: "Invalid status",
+    }),
+  })
+  .refine(
+    (data) => {
+      const startDate = parseDateString(data.startDate);
+      const endDate = parseDateString(data.endDate);
+
+      return endDate >= startDate;
+    },
+    { message: "End date must be after start date", path: ["endDate"] }
+  );
 
 export const eventDeleteSchema = z.object({
   id: z.number().min(1, { message: "Invalid event ID" }),

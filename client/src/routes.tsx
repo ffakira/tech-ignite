@@ -5,6 +5,7 @@ import { RooLayout } from "@/components/layouts/root-layout";
 import { NotFoundPage } from "@/pages/not-found";
 import { HomePage } from "@/pages/home";
 import { NewEventPage } from "@/pages/event/new-event";
+import { EventPage } from "@/pages/event/event";
 
 export const routes = createBrowserRouter([
   {
@@ -26,6 +27,20 @@ export const routes = createBrowserRouter([
       {
         path: "new",
         element: <NewEventPage />,
+      },
+      {
+        path: ":eventId",
+        element: <EventPage />,
+      },
+    ],
+  },
+  {
+    path: "*",
+    element: <RooLayout />,
+    children: [
+      {
+        path: "*",
+        element: <NotFoundPage />,
       },
     ],
   },

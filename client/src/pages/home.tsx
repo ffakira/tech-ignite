@@ -28,9 +28,13 @@ import {
   useUpdateEventMutation,
 } from "@/lib/mutations/event.mutation";
 import { toast } from "sonner";
+import { CalendarPicker } from "@/components/calendar-picker";
+import { useNavigate } from "react-router-dom";
+import { EventStatusBadge } from "@/components/event-status-badge";
 
 export function HomePage() {
   const result: any = useQuery({ ...useEventsQuery() });
+  const navigate = useNavigate();
 
   if (result.isLoading) {
     return <p>Loading...</p>;
@@ -45,16 +49,23 @@ export function HomePage() {
         {message.map((event: any) => {
           return (
             <div
+              role="button"
+              onClick={() => {
+                navigate(`/events/${event.id}`);
+              }}
               key={event.id}
-              className="relative border p-4 rounded-md shadow-lg space-y-6"
+              className="relative border p-4 rounded-md shadow-lg space-y-6 hover:border-blue-300"
             >
-              <h1 className="text-2xl font-semibold text-stone-800">
+              <h2
+                title={event.title}
+                className="truncate w-3/4 text-xl font-semibold text-stone-800"
+              >
                 {event.title}
-              </h1>
+              </h2>
               <EditDialogTrigger event={event}>
                 <Button
                   type="button"
-                  className={button({ class: "absolute -top-4 right-2" })}
+                  className={button({ class: "absolute -top-4 right-2 z-10" })}
                 >
                   <SettingsIcon
                     className="shrink-0 size-4"
@@ -67,7 +78,11 @@ export function HomePage() {
                 <div className="flex items-center">
                   <div className="flex-1">
                     <p className="bg-gray-200 text-stone-700 font-semibold py-1 w-fit rounded-full px-4 text-sm">
-                      ${new Decimal(event.price).div(100).toNumber()}
+                      {event.price === 0 ? (
+                        "Free"
+                      ) : (
+                        <>${new Decimal(event.price).div(100).toNumber()}</>
+                      )}
                     </p>
                   </div>
                   <EventStatusBadge status={event.status} />
@@ -75,17 +90,17 @@ export function HomePage() {
                 <div className="flex">
                   <div className="flex-1">
                     <p className="font-semibold">Start Date</p>
-                    <p className="inline-flex gap-1 items-center text-sm">
+                    <time className="inline-flex gap-1 items-center text-sm">
                       <ClockIcon className="shrink-0 size-4" aria-label="" />
                       {formatDate(event.startDate)}
-                    </p>
+                    </time>
                   </div>
                   <div>
                     <p className="font-semibold">End Date</p>
-                    <p className="inline-flex gap-1 items-center text-sm">
+                    <time className="inline-flex gap-1 items-center text-sm">
                       <ClockIcon className="shrink-0 size-4" aria-label="" />
                       {formatDate(event.endDate)}
-                    </p>
+                    </time>
                   </div>
                 </div>
               </div>
@@ -238,15 +253,24 @@ function EditDialogTrigger({
                   <div className="h-full space-y-4 pb-10">
                     <div className="space-y-1.5">
                       <div className="flex gap-2 items-center">
-                        <h2 className="text-xl font-semibold flex-1">
-                          {event.title}
-                        </h2>
+                        <div className="flex-1">
+                          <h2
+                            title={event.title}
+                            className="truncate w-64 text-xl font-semibold"
+                          >
+                            {event.title}
+                          </h2>
+                        </div>
                         <EventStatusBadge status={event.status} />
                       </div>
                       <p>
                         <span className="font-semibold">Price: </span>
                         <span>
-                          ${new Decimal(event.price).div(100).toNumber()}
+                          {event.price === 0 ? (
+                            "Free"
+                          ) : (
+                            <>${new Decimal(event.price).div(100).toNumber()}</>
+                          )}
                         </span>
                       </p>
                     </div>
@@ -370,18 +394,14 @@ function EditDialogTrigger({
                           name="startDate"
                           render={({ field }) => {
                             return (
-                              <div className="space-y-1">
-                                <Label
-                                  className="font-semibold"
-                                  htmlFor={field.name}
-                                >
-                                  Start Date
-                                </Label>
-                                <Input
-                                  className="w-full border px-1.5 py-2 rounded-md focus:outline"
-                                  {...field}
-                                />
-                              </div>
+                              <CalendarPicker
+                                ref={field.ref}
+                                name={field.name}
+                                label="End Date"
+                                placeholder="End Date"
+                                value={field.value}
+                                onChange={field.onChange}
+                              />
                             );
                           }}
                         />
@@ -390,18 +410,14 @@ function EditDialogTrigger({
                           name="endDate"
                           render={({ field }) => {
                             return (
-                              <div className="space-y-1">
-                                <Label
-                                  htmlFor={field.name}
-                                  className="font-semibold"
-                                >
-                                  End Date
-                                </Label>
-                                <Input
-                                  className="w-full border px-1.5 py-2 rounded-md focus:outline-none"
-                                  {...field}
-                                />
-                              </div>
+                              <CalendarPicker
+                                ref={field.ref}
+                                name={field.name}
+                                label="End Date"
+                                placeholder="End Date"
+                                value={field.value}
+                                onChange={field.onChange}
+                              />
                             );
                           }}
                         />
@@ -450,34 +466,4 @@ function EditDialogTrigger({
       </ModalOverlay>
     </DialogTrigger>
   );
-}
-
-function EventStatusBadge({
-  status,
-}: {
-  status: "started" | "paused" | "completed";
-}) {
-  if (status === "started") {
-    return (
-      <span className="bg-green-600 text-white px-2 py-1 rounded-full text-xs font-semibold">
-        started
-      </span>
-    );
-  }
-
-  if (status === "paused") {
-    return (
-      <span className="bg-yellow-600 text-white px-2 py-1 rounded-full text-xs font-semibold">
-        paused
-      </span>
-    );
-  }
-
-  if (status === "completed") {
-    return (
-      <span className="bg-blue-600 text-white px-2 py-1 rounded-full text-xs font-semibold">
-        completed
-      </span>
-    );
-  }
 }

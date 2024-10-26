@@ -1,4 +1,8 @@
-import React, { forwardRef, InputHTMLAttributes, ForwardedRef } from "react";
+import React, {
+  forwardRef,
+  type InputHTMLAttributes,
+  type ForwardedRef,
+} from "react";
 import {
   Button,
   Dialog,
@@ -7,8 +11,6 @@ import {
   Input,
   Label,
   Popover,
-} from "react-aria-components";
-import {
   Calendar,
   CalendarGrid,
   CalendarGridHeader,
@@ -37,7 +39,7 @@ export interface CalendarPickerProps
 }
 
 /**
- * @TODO add validaition for date
+ * @TODO add validation for date
  */
 export const CalendarPicker = forwardRef<HTMLInputElement, CalendarPickerProps>(
   (
