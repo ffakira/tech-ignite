@@ -182,7 +182,14 @@ export function NewEventPage() {
                     >
                       Start Date
                     </Label>
-                    <Group className="relative flex border rounded-md px-2 py-1.5">
+                    <Group
+                      className={cn(
+                        "relative flex border rounded-md px-2 py-1.5",
+                        fieldState.error
+                          ? "border-red-300 focus:ring-red-300"
+                          : "border-gray-200 focus:ring-blue-300"
+                      )}
+                    >
                       <Input
                         className="flex-1 text-stone-700 -my-1.5 w-full bg-transparent focus:outline-none"
                         placeholder="Start Date"
@@ -278,7 +285,14 @@ export function NewEventPage() {
                       End Date
                     </Label>
                     <div className="space-y-1">
-                      <Group className="relative flex border rounded-md px-2 py-1.5">
+                      <Group
+                        className={cn(
+                          "relative flex border rounded-md px-2 py-1.5",
+                          fieldState.error
+                            ? "border-red-300 focus:ring-red-300"
+                            : "border-gray-200 focus:ring-blue-300"
+                        )}
+                      >
                         <Input
                           className="flex-1 text-stone-700 -my-1.5 w-full bg-transparent focus:outline-none"
                           placeholder="End Date"

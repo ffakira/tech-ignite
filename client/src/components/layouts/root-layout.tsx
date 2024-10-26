@@ -5,7 +5,7 @@ export function RooLayout() {
   return (
     <main className="grid h-dvh grid-rows-[auto,1fr]">
       <Navbar />
-      <div className="mx-20 h-[calc(100dvh-theme(spacing.14))] pt-4">
+      <div className="mx-8 lg:mx-20 h-[calc(100dvh-theme(spacing.18))] pt-4">
         <Outlet />
       </div>
     </main>

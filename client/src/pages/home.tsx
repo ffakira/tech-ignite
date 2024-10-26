@@ -1,9 +1,9 @@
 import { button } from "@/components/ui/button";
 import { useEventsQuery } from "@/lib/queries/event.query";
 import { formatDate, formatDateInput } from "@/lib/utils";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { ClockIcon, PencilIcon, SettingsIcon, XIcon } from "lucide-react";
-import { type PropsWithChildren, useState } from "react";
+import { type PropsWithChildren, useEffect, useState } from "react";
 import Decimal from "decimal.js";
 import {
   Button,
@@ -97,8 +97,9 @@ function EditDialogTrigger({
   const toastDeleteId = "event:delete";
 
   const [edit, setEdit] = useState(false);
-  const [, setIsOpen] = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
 
+  const queryClient = useQueryClient();
   const deleteEventMutation = useDeleteEventMutation();
   const updateEventMutation = useUpdateEventMutation();
 
@@ -112,16 +113,27 @@ function EditDialogTrigger({
     disabled: updateEventMutation.isPending || deleteEventMutation.isPending,
     resolver: zodResolver(eventUpdateSchema),
     defaultValues: {
-      id: event.id,
+      id: Number(event.id),
       title: event.title,
       price: new Decimal(event.price).div(100).toNumber(),
-      startDate: formatDateInput(+event.startDate),
-      endDate: formatDateInput(+event.endDate),
+      startDate: formatDateInput(Number(event.startDate)),
+      endDate: formatDateInput(Number(event.endDate)),
       status: event.status,
     },
   });
 
-  console.log(form.formState.errors);
+  console.log(form.formState.errors, form.watch("id"));
+
+  useEffect(() => {
+    form.reset({
+      id: Number(event.id),
+      title: event.title,
+      price: new Decimal(event.price).div(100).toNumber(),
+      startDate: formatDateInput(Number(event.startDate)),
+      endDate: formatDateInput(Number(event.endDate)),
+      status: event.status,
+    });
+  }, [event, form]);
 
   const handleOnClose = () => {
     if (deleteEventMutation.isPending || updateEventMutation.isPending) {
@@ -133,7 +145,7 @@ function EditDialogTrigger({
     setEdit(false);
 
     deleteEventMutation.mutate(
-      { id: event.id },
+      { id: Number(event.id) },
       {
         onSuccess() {
           toast.success("Event deleted successfully", {
@@ -160,32 +172,41 @@ function EditDialogTrigger({
       return;
     }
 
-    console.log(data);
-
     updateEventMutation.mutate(data, {
-      onSuccess(data) {
-        console.log(data);
-        form.reset();
+      onSuccess({ data }) {
+        /** @dev updates the new default values */
+        form.reset({
+          id: data.id,
+          title: data.title,
+          price: new Decimal(data.price).div(100).toNumber(),
+          startDate: formatDateInput(Number(data.startDate)),
+          endDate: formatDateInput(Number(data.endDate)),
+          status: data.status,
+        });
+
+        queryClient.invalidateQueries({ queryKey: ["events"] });
+        setIsOpen(false);
+
         toast.success("Event have been succesfully updated", {
           id: toastUpdateId,
           duration: 3000,
         });
-        setIsOpen(false);
       },
-      onError(data) {
-        console.log(data);
+      onError(error) {
+        console.log(error);
       },
     });
   });
 
   return (
-    <DialogTrigger>
+    <DialogTrigger isOpen={isOpen} onOpenChange={(open) => setIsOpen(open)}>
       {children}
       <ModalOverlay
         isDismissable
+        onOpenChange={setIsOpen}
         className="bg-black/50 absolute top-0 z-10 w-dvw h-dvh grid place-items-center"
       >
-        <Modal className="relative">
+        <Modal onOpenChange={setIsOpen} className="relative">
           <Dialog className="bg-white shadow-lg w-96 rounded-md focus:outline-none p-4 grid grid-rows-[auto,1fr,auto] gap-2">
             {({ close }) => (
               <>
@@ -236,11 +257,6 @@ function EditDialogTrigger({
                 ) : (
                   <div className="h-full">
                     <form onSubmit={submit}>
-                      <input
-                        type="hidden"
-                        value={event.id}
-                        {...form.register("id")}
-                      />
                       <fieldset className="space-y-4">
                         <Controller
                           control={form.control}
@@ -376,27 +392,29 @@ function EditDialogTrigger({
                             );
                           }}
                         />
+                        <Button
+                          type="submit"
+                          className={button({ class: "w-full" })}
+                        >
+                          Update
+                        </Button>
                       </fieldset>
-                      <Button type="submit" className={button()}>
-                        Update
-                      </Button>
                     </form>
                   </div>
                 )}
-                <div className="space-x-2 justify-self-end">
-                  <Button
-                    onPress={close}
-                    isDisabled={
-                      deleteEventMutation.isPending ||
-                      updateEventMutation.isPending
-                    }
-                    className={button()}
-                  >
-                    Cancel
-                  </Button>
-                  {edit ? (
-                    <></>
-                  ) : (
+
+                {!edit && (
+                  <div className="space-x-2 justify-self-end">
+                    <Button
+                      onPress={close}
+                      isDisabled={
+                        deleteEventMutation.isPending ||
+                        updateEventMutation.isPending
+                      }
+                      className={button()}
+                    >
+                      Cancel
+                    </Button>
                     <Button
                       type="button"
                       isDisabled={deleteEventMutation.isPending}
@@ -410,8 +428,8 @@ function EditDialogTrigger({
                     >
                       Delete
                     </Button>
-                  )}
-                </div>
+                  </div>
+                )}
               </>
             )}
           </Dialog>
