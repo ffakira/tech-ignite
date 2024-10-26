@@ -1,47 +1,20 @@
 import { useForm, Controller } from "react-hook-form";
-import {
-  Input,
-  Button,
-  Label,
-  Group,
-  Calendar,
-  Heading,
-  CalendarGrid,
-  CalendarCell,
-  DialogTrigger,
-  Popover,
-  Dialog,
-  CalendarGridHeader,
-  CalendarGridBody,
-  CalendarHeaderCell,
-} from "react-aria-components";
-import { today, getLocalTimeZone } from "@internationalized/date";
-import {
-  CalendarIcon,
-  ChevronLeftIcon,
-  ChevronRightIcon,
-  TagIcon,
-} from "lucide-react";
+import { Input, Button, Label, Group } from "react-aria-components";
+import { TagIcon } from "lucide-react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { eventSchema } from "@/lib/schemas/event.schema";
 import { button } from "@/components/ui/button";
-import {
-  calendarCell,
-  calendarHeaderButton,
-  calendarHeading,
-} from "@/components/ui/calendar";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { useCreateEventMutation } from "@/lib/mutations/event.mutation";
+import { CalendarPicker } from "@/components/calendar-picker";
 
 /**
  * @TODO migrate calendar components to its own component
- * @TODO integrate react-hook-form context provider
  */
 export function NewEventPage() {
   const toastId = "event:created";
-  const onDateChangeToastId = "event:date-changed";
 
   const createEventMutation = useCreateEventMutation();
 
@@ -173,209 +146,32 @@ export function NewEventPage() {
             <Controller
               control={form.control}
               name="startDate"
-              render={({ field, fieldState }) => {
+              render={({ field }) => {
                 return (
-                  <div className="space-y-1.5">
-                    <Label
-                      className="font-semibold text-stone-700"
-                      htmlFor={field.name}
-                    >
-                      Start Date
-                    </Label>
-                    <Group
-                      className={cn(
-                        "relative flex border rounded-md px-2 py-1.5",
-                        fieldState.error
-                          ? "border-red-300 focus:ring-red-300"
-                          : "border-gray-200 focus:ring-blue-300"
-                      )}
-                    >
-                      <Input
-                        className="flex-1 text-stone-700 -my-1.5 w-full bg-transparent focus:outline-none"
-                        placeholder="Start Date"
-                        {...field}
-                      />
-                      <DialogTrigger>
-                        <Button
-                          className={button({
-                            class: "rounded-l-none -mr-2 -my-1.5",
-                          })}
-                        >
-                          <CalendarIcon className="shrink-0 size-4" />
-                        </Button>
-                        <Popover className="absolute left-0">
-                          <Dialog className="bg-white border rounded-md shadow-lg p-4 focus:outline-none">
-                            {({ close }) => (
-                              <Calendar
-                                aria-label="Start date"
-                                minValue={today(getLocalTimeZone())}
-                                onChange={(data) => {
-                                  const date = `${data.day}/${data.month}/${data.year}`;
-                                  form.setValue("startDate", date);
-                                  toast.info(`Start date changed: ${date}`, {
-                                    id: onDateChangeToastId,
-                                    duration: 3000,
-                                  });
-                                  close();
-                                }}
-                              >
-                                <header className="flex w-full justify-between gap-4 mb-4">
-                                  <Button
-                                    className={calendarHeaderButton()}
-                                    slot="previous"
-                                  >
-                                    <ChevronLeftIcon
-                                      className="group-data-[disabled]:text-gray-400"
-                                      aria-label="Previous month"
-                                    />
-                                  </Button>
-                                  <Heading className={calendarHeading()} />
-                                  <Button
-                                    className={calendarHeaderButton()}
-                                    slot="next"
-                                  >
-                                    <ChevronRightIcon
-                                      className="group-data-[disabled]:text-gray-400"
-                                      aria-label="Next month"
-                                    />
-                                  </Button>
-                                </header>
-                                <CalendarGrid>
-                                  <CalendarGridHeader>
-                                    {(day) => (
-                                      <CalendarHeaderCell>
-                                        {day}
-                                      </CalendarHeaderCell>
-                                    )}
-                                  </CalendarGridHeader>
-                                  <CalendarGridBody>
-                                    {(date) => (
-                                      <CalendarCell
-                                        className={calendarCell()}
-                                        date={date}
-                                      />
-                                    )}
-                                  </CalendarGridBody>
-                                </CalendarGrid>
-                              </Calendar>
-                            )}
-                          </Dialog>
-                        </Popover>
-                      </DialogTrigger>
-                    </Group>
-                    {fieldState.error && (
-                      <p className="text-red-500 text-sm italic">
-                        {fieldState.error.message}
-                      </p>
-                    )}
-                  </div>
+                  <CalendarPicker
+                    ref={field.ref}
+                    name={field.name}
+                    label="Start Date"
+                    placeholder="Start Date"
+                    value={field.value}
+                    onChange={field.onChange}
+                  />
                 );
               }}
             />
             <Controller
               control={form.control}
               name="endDate"
-              render={({ field, fieldState }) => {
+              render={({ field }) => {
                 return (
-                  <div className="relative space-y-2">
-                    <Label
-                      className="font-semibold text-stone-700"
-                      htmlFor={field.name}
-                    >
-                      End Date
-                    </Label>
-                    <div className="space-y-1">
-                      <Group
-                        className={cn(
-                          "relative flex border rounded-md px-2 py-1.5",
-                          fieldState.error
-                            ? "border-red-300 focus:ring-red-300"
-                            : "border-gray-200 focus:ring-blue-300"
-                        )}
-                      >
-                        <Input
-                          className="flex-1 text-stone-700 -my-1.5 w-full bg-transparent focus:outline-none"
-                          placeholder="End Date"
-                          {...field}
-                        />
-                        <DialogTrigger>
-                          <Button
-                            className={button({
-                              class: "rounded-l-none -mr-2 -my-1.5",
-                            })}
-                          >
-                            <CalendarIcon
-                              className="shrink-0 size-4"
-                              aria-label="Start date"
-                            />
-                          </Button>
-                          <Popover className="absolute left-0">
-                            <Dialog className="bg-white border rounded-md shadow-lg p-4 focus:outline-none">
-                              {({ close }) => (
-                                <Calendar
-                                  aria-label="End date"
-                                  minValue={today(getLocalTimeZone())}
-                                  onChange={(data) => {
-                                    const date = `${data.day}/${data.month}/${data.year}`;
-                                    form.setValue("endDate", date);
-                                    toast.info(`End date changed: ${date}`, {
-                                      id: onDateChangeToastId,
-                                      duration: 3000,
-                                    });
-                                    close();
-                                  }}
-                                >
-                                  <header className="flex w-full justify-between gap-4 mb-4">
-                                    <Button
-                                      className={calendarHeaderButton()}
-                                      slot="previous"
-                                    >
-                                      <ChevronLeftIcon
-                                        className="group-data-[disabled]:text-gray-400"
-                                        aria-label="Previous month"
-                                      />
-                                    </Button>
-                                    <Heading className={calendarHeading()} />
-                                    <Button
-                                      className={calendarHeaderButton()}
-                                      slot="next"
-                                    >
-                                      <ChevronRightIcon
-                                        className="group-data-[disabled]:text-gray-400"
-                                        aria-label="Next month"
-                                      />
-                                    </Button>
-                                  </header>
-                                  <CalendarGrid>
-                                    <CalendarGridHeader>
-                                      {(day) => (
-                                        <CalendarHeaderCell>
-                                          {day}
-                                        </CalendarHeaderCell>
-                                      )}
-                                    </CalendarGridHeader>
-                                    <CalendarGridBody>
-                                      {(date) => (
-                                        <CalendarCell
-                                          className={calendarCell()}
-                                          date={date}
-                                        />
-                                      )}
-                                    </CalendarGridBody>
-                                  </CalendarGrid>
-                                </Calendar>
-                              )}
-                            </Dialog>
-                          </Popover>
-                        </DialogTrigger>
-                      </Group>
-                      {fieldState.error && (
-                        <p className="text-red-500 text-sm italic">
-                          {fieldState.error.message}
-                        </p>
-                      )}
-                    </div>
-                  </div>
+                  <CalendarPicker
+                    ref={field.ref}
+                    name={field.name}
+                    label="End Date"
+                    placeholder="End Date"
+                    value={field.value}
+                    onChange={field.onChange}
+                  />
                 );
               }}
             />
