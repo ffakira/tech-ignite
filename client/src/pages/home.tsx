@@ -37,7 +37,6 @@ export function HomePage() {
   }
 
   const { data: message } = result.data;
-  console.log(message);
 
   return (
     <div className="relative space-y-4">
@@ -47,7 +46,7 @@ export function HomePage() {
           return (
             <div
               key={event.id}
-              className="relative border p-4 rounded-md shadow-lg"
+              className="relative border p-4 rounded-md shadow-lg space-y-6"
             >
               <h1 className="text-2xl font-semibold text-stone-800">
                 {event.title}
@@ -55,7 +54,7 @@ export function HomePage() {
               <EditDialogTrigger event={event}>
                 <Button
                   type="button"
-                  className={button({ class: "absolute top-2 right-2" })}
+                  className={button({ class: "absolute -top-4 right-2" })}
                 >
                   <SettingsIcon
                     className="shrink-0 size-4"
@@ -64,21 +63,30 @@ export function HomePage() {
                   <span className="sr-only">Edit or delete event</span>
                 </Button>
               </EditDialogTrigger>
-              <EventStatusBadge status={event.status} />
-              <div className="flex justify-between">
-                <div>
-                  <p className="font-semibold">Start Date</p>
-                  <p className="inline-flex gap-1 items-center text-sm">
-                    <ClockIcon className="shrink-0 size-4" aria-label="" />
-                    {formatDate(event.startDate)}
-                  </p>
+              <div className="space-y-4">
+                <div className="flex items-center">
+                  <div className="flex-1">
+                    <p className="bg-gray-200 text-stone-700 font-semibold py-1 w-fit rounded-full px-4 text-sm">
+                      ${new Decimal(event.price).div(100).toNumber()}
+                    </p>
+                  </div>
+                  <EventStatusBadge status={event.status} />
                 </div>
-                <div>
-                  <p className="font-semibold">End Date</p>
-                  <p className="inline-flex gap-1 items-center text-sm">
-                    <ClockIcon className="shrink-0 size-4" aria-label="" />
-                    {formatDate(event.endDate)}
-                  </p>
+                <div className="flex">
+                  <div className="flex-1">
+                    <p className="font-semibold">Start Date</p>
+                    <p className="inline-flex gap-1 items-center text-sm">
+                      <ClockIcon className="shrink-0 size-4" aria-label="" />
+                      {formatDate(event.startDate)}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="font-semibold">End Date</p>
+                    <p className="inline-flex gap-1 items-center text-sm">
+                      <ClockIcon className="shrink-0 size-4" aria-label="" />
+                      {formatDate(event.endDate)}
+                    </p>
+                  </div>
                 </div>
               </div>
             </div>
@@ -186,6 +194,7 @@ function EditDialogTrigger({
 
         queryClient.invalidateQueries({ queryKey: ["events"] });
         setIsOpen(false);
+        setEdit(false);
 
         toast.success("Event have been succesfully updated", {
           id: toastUpdateId,
@@ -230,12 +239,14 @@ function EditDialogTrigger({
                 </div>
 
                 {!edit ? (
-                  <div className="h-full">
-                    <div className="flex gap-2 items-center">
-                      <h2 className="text-xl font-semibold">{event.title}</h2>
-                      <EventStatusBadge status={event.status} />
-                    </div>
-                    <div>
+                  <div className="h-full space-y-4 pb-10">
+                    <div className="space-y-1.5">
+                      <div className="flex gap-2 items-center">
+                        <h2 className="text-xl font-semibold flex-1">
+                          {event.title}
+                        </h2>
+                        <EventStatusBadge status={event.status} />
+                      </div>
                       <p>
                         <span className="font-semibold">Price: </span>
                         <span>
@@ -245,12 +256,18 @@ function EditDialogTrigger({
                     </div>
                     <div className="grid grid-cols-2">
                       <div>
-                        <ClockIcon className="shrink-0 size-4" />
-                        <time>{formatDate(+event.startDate)}</time>
+                        <p className="font-semibold">Start Date</p>
+                        <div className="flex items-center gap-1.5">
+                          <ClockIcon className="shrink-0 size-4" />
+                          <time>{formatDate(+event.startDate)}</time>
+                        </div>
                       </div>
                       <div>
-                        <ClockIcon className="shrink-0 size-4" />
-                        <time>{formatDate(+event.endDate)}</time>
+                        <p className="font-semibold">End Date</p>
+                        <div className="flex items-center gap-1.5">
+                          <ClockIcon className="shrink-0 size-4" />
+                          <time>{formatDate(+event.endDate)}</time>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -341,7 +358,7 @@ function EditDialogTrigger({
                                       className="px-2 space-y-2 bg-white shadow-md rounded-b"
                                     >
                                       {(item) => (
-                                        <ListBoxItem className="cursor-pointer w-[calc(theme(spacing.96)-theme(spacing.8))] -mx-2 hover:bg-blue-100 py-1.5 px-2">
+                                        <ListBoxItem className="cursor-pointer w-[calc(theme(spacing.96)-theme(spacing.8))] -mx-2 hover:bg-blue-100 py-1.5 px-2 aria-selected:bg-blue-100">
                                           {item.name}
                                         </ListBoxItem>
                                       )}
