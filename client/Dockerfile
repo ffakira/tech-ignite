@@ -16,13 +16,10 @@ COPY . .
 ENV NODE_ENV=production
 RUN bun run build
 
-# serve dist folder with nginx
-FROM nginx:alpine AS release
-COPY --from=prerelease /app/dist /usr/share/nginx/html
-COPY nginx.conf /etc/nginx/nginx.conf
+# expose dist folder
+FROM alpine:latest AS final
+WORKDIR /app
+COPY --from=prerelease /app/dist ./dist
 
 # export port 5173
 EXPOSE 5173
-
-# start nginx
-CMD ["nginx", "-g", "daemon off;"]

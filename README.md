@@ -1,5 +1,78 @@
 # tech-ignite
 
+## Getting started
+
+1. Rename inside the `client` folder: 
+  * `.env.example` to `.env.local`
+
+```
+NODE_ENV=dev
+VITE_API_V1_URL=http://localhost:8080/api/v1
+```
+
+2. Back to the root project, where `docker-compose.yml` is located, and
+run the following command
+
+```
+docker compose up 
+```
+
+## Assumptions
+
+1. The start and end date are only changed by day. Via API, can easily add an 1 second. The requirements were not clear enough, asides making sure the end date is greater than start date.
+
+**Via SQL:**
+```diff
+CREATE TRIGGER validate_events_before_insert
+BEFORE INSERT ON events FOR EACH ROW
+BEGIN
+    SELECT CASE
+        -- Validate events.title column
+        WHEN LENGTH(NEW.title) < 3 OR LENGTH(NEW.title) > 255
+        THEN RAISE(ABORT, 'error: events.title column length should be between 3 and 255 characters')
+
+        -- Validate events.price column    
+        WHEN NEW.price < 0
+        THEN RAISE(ABORT, 'error: events.price must be a positive integer')
+
+        -- Validate events.status column
+        WHEN NEW.status NOT IN ('started', 'completed', 'paused')
+        THEN RAISE(ABORT, 'error: events.status must be one of the following: started | completed | paused')
+
+        -- Validate events.start_date column
+        WHEN NEW.start_date < 0
+        THEN RAISE(ABORT, 'error: events.start_date must be a positive integer')
+
+        -- Validate events.end_date column
+        WHEN NEW.end_date < 0
+        THEN RAISE(ABORT, 'error: events.end_date must be a positive integer')
+
+        -- Validate events.start_date < events.end_date columns
+-        WHEN NEW.start_date >= NEW.end_date
++        WHEN NEW.start_date + 86400 >= NEW.end_date
+        THEN RAISE(ABORT, 'error: events.start_date should be less than events.end_date')
+    END;
+END;
+
+# And update for UPDATE trigger also
+```
+
+**Via TypeScript:**
+```diff
+export const eventSchema = baseEventSchema.refine(
+  (data) => {
+    const startDate = parseDateString(data.startDate);
+    const endDate = parseDateString(data.endDate);
+
+-    return endDate >= startDate;
++    return endDate.getTime() >= startDate.getTime() + 86400 * 1000;
+  },
+  { message: "End date must be after start date", path: ["endDate"] }
+);
+```
+
+2. The status can only be changed, when updating an event. When creating a new status, the status is automatically set to `started`.
+
 ## Client
 
 * SPA (Single Page Application), using the following libraries:
@@ -8,7 +81,82 @@
   * `@tanstack/react-query` handling HTTP requests and handling async operations and has cache strategy
   * `tailwindcss` allows for quick styling and prototyping the application
 
+Run in development mode
+```
+$ bun dev
+
+# In the case if the environment files are not being expoed
+$ bun --bun dev
+```
+
+### Folder structure
+* `lib`: consists react-query related stuffs for mutations and queries, along with zod schemas and utils.
+* `components/ui` consists tailwind variants to style atomic elements
+* `components/layouts` consists the root layout with the usage of `<Outlet />` from `react-router-dom`
+* `components` consinsts global components that is used across the app
+* `pages` consists the business logic and the main UI layout of page, structured the same way how `react-router-dom` is defined
+* `routes` file is for routing
+* `styles` folder consists an `app.css` for importing tailwind styles
+
+**Note** 
+Unlike typical React projects where you create components and import to main UI component. The approach that I've applied, it allows to encapuslate all business logic within a single file. And only export the main UI component. 
+
+The decision for going unconventional approach, allows to debug the component easier. In addition, during early developments, should avoid [pre-maturely DRY code](https://testing.googleblog.com/2024/05/dont-dry-your-code-prematurely.html#:~:text=Applying%20DRY%20principles%20too%20rigidly,redundant%20or%20just%20superficially%20similar.) thus avoiding building technical debts on the early stage.
+
 ## Server
+
+### Setting up the server
+```
+# Ensure you are inside the server folder
+
+# If data folder does exists inside the server folder
+$ mkdir -p data
+
+# Clean up anything
+$ mvn clean
+
+# Apply migrations from database
+$ mvn flyway:migrate
+ 
+# Create jar file
+$ mvn package -DskipTests
+
+# You can 
+$ java -jar target/events-0.0.1-SNAPSHOT.jar --spring.profiles.active=dev
+```
+
+### Folder structure
+* `config` contains configuration files for boostraping Srping app
+* `controllers` contains the RESTful api
+* `models` contains the structure of the object
+* `repositories` interacts with the database via JOOQ
+* `services` add additional business logic and interact with repository
+* `resources/db/migration` contains `flyway` migration files, to sync up with the database
+
+### Improvements 
+* Setup different `application.properties` for `dev` | `staging` | `prod` | `test`. Currently there is only one profile
+  * Creating an `application-dev.properties` file for dev staging, to have different environments for each stage of development lifecycle
+* Integrating Github Actions with CI/CD pipeline to verify the build + run JUnit tests
+  * Creating in-memory SQLite database, and have default database seeds, where you can setup unit tests.
+
+* Create maven profiles, with `profiles` tag, and have different id on `pom.xml` file for managing different environments
+```xml
+<!-- rest of pom.xml file -->
+<profiles>
+  <profile>
+    <id>dev</id>
+    <!-- setup for dev stage -->
+  </profile>
+  <profile>
+    <id>prod</id>
+    <!-- setup for prod stage -->
+  </profile>
+</profiles>
+
+* `createdAt`, `updatedAt`, `startDate` and `endDate` currently is set to `int` which will cause an int overflow, from Y2k38 bug, when time reaches on ~Jan 2038. A simple fix, is to use `long` instead of `int`.
+
+* A better docker build, instead of creating flyway migrations and generate JOOQ outside of docker container.
+```
 
 ### API Documentation
 
@@ -68,8 +216,8 @@ Create a new event
 {
   "title": "string between 3 to 255 characters",
   "price": "number in cents",
-  "startDate": "string in dd/mm/yyyy format",
-  "endDate": "string in dd/mm/yyyy format"
+  "startDate": "number in unix timestamp in seconds",
+  "endDate": "number in unix timestamp in seconds"
 }
 ```
 
@@ -103,8 +251,8 @@ $ curl -X POST http://localhost:8080/api/v1/events/new \
 -d '{
     "title": "Halloween 2k24",
     "price": 5500,
-    "startDate": "31/10/2024",
-    "endDate": "31/10/2024"
+    "startDate": 1757200000,
+    "endDate": 1757286400
 }'
 ```
 
@@ -122,8 +270,8 @@ Updates an event by id
   "title": "string between 3 to 255 characters",
   "price": "number in cents",
   "status": "string: started | completed | paused",
-  "startDate": "string in dd/mm/yyyy format",
-  "endDate": "string in dd/mm/yyyy format"
+  "startDate": "number in unix timestamp in seconds",
+  "endDate": "number in unix timestamp in seconds"
 }
 ```
 
@@ -162,8 +310,8 @@ $ curl -X PUT http://localhost:8080/api/v1/events/9999 \
     "title": "Halloween 2024",
     "price": 0,
     "status": "completed",
-    "startDate": "31/10/2024",
-    "endDate": "31/10/2024"
+    "startDate": 1757200000,
+    "endDate": 1757286400
 }'
 ```
 
