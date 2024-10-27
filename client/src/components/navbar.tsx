@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom";
+import { Link, NavLink } from "react-router-dom";
 
 export function Navbar() {
   return (
@@ -6,9 +6,12 @@ export function Navbar() {
       <Link className="font-semibold text-xl" to="/">
         📅 Events Manager
       </Link>
-      <Link className="hover:underline" to="/events/new">
+      <NavLink
+        className="hover:border-b hover:border-black aria-[current=page]:font-bold aria-[current=page]:text-blue-500 aria-[current=page]:border-b aria-[current=page]:border-blue-500"
+        to="/events/new"
+      >
         New Event
-      </Link>
+      </NavLink>
     </nav>
   );
 }

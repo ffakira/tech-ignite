@@ -1,6 +1,6 @@
 import { button } from "@/components/ui/button";
 import { useEventsQuery } from "@/lib/queries/event.query";
-import { formatDate, formatDateInput } from "@/lib/utils";
+import { cn, formatDate, formatDateInput } from "@/lib/utils";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { ClockIcon, PencilIcon, SettingsIcon, XIcon } from "lucide-react";
 import { type PropsWithChildren, useEffect, useState } from "react";
@@ -21,7 +21,7 @@ import {
 } from "react-aria-components";
 import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { eventUpdateSchema } from "@/lib/schemas/event.schema";
+import { Event, eventUpdateSchema } from "@/lib/schemas/event.schema";
 import { z } from "zod";
 import {
   useDeleteEventMutation,
@@ -29,84 +29,107 @@ import {
 } from "@/lib/mutations/event.mutation";
 import { toast } from "sonner";
 import { CalendarPicker } from "@/components/calendar-picker";
-import { useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { EventStatusBadge } from "@/components/event-status-badge";
+import { input } from "@/components/ui/input";
 
 export function HomePage() {
+  // @TODO add types on queryOptions return types
+  /* eslint-disable  @typescript-eslint/no-explicit-any */
   const result: any = useQuery({ ...useEventsQuery() });
-  const navigate = useNavigate();
 
   if (result.isLoading) {
     return <p>Loading...</p>;
   }
 
-  const { data: message } = result.data;
+  const { data: events } = result;
+
+  if (!events || !Array.isArray(events.data) || events.data.length === 0) {
+    return (
+      <div className="space-y-4">
+        <h1 className="font-semibold text-2xl">All Events</h1>
+        <div className="bg-gray-200 grid justify-center p-4 rounded-md gap-4">
+          <h2 className="text-xl">No Events Found</h2>
+          <Link to="/events/new" className={button()}>
+            Create new event
+          </Link>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="relative space-y-4">
       <h1 className="font-semibold text-2xl">All Events</h1>
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-        {message.map((event: any) => {
-          return (
-            <div
-              role="button"
-              onClick={() => {
-                navigate(`/events/${event.id}`);
-              }}
-              key={event.id}
-              className="relative border p-4 rounded-md shadow-lg space-y-6 hover:border-blue-300"
-            >
-              <h2
-                title={event.title}
-                className="truncate w-3/4 text-xl font-semibold text-stone-800"
+        {events.data.map(
+          (event: Event & { status: "started" | "completed" | "paused" }) => {
+            return (
+              <div
+                key={event.id}
+                className="relative border p-4 rounded-md shadow-lg space-y-6 hover:border-blue-300 z-1"
               >
-                {event.title}
-              </h2>
-              <EditDialogTrigger event={event}>
-                <Button
-                  type="button"
-                  className={button({ class: "absolute -top-4 right-2 z-10" })}
+                <h2
+                  title={event.title}
+                  className="truncate w-3/4 text-xl font-semibold text-stone-800"
                 >
-                  <SettingsIcon
-                    className="shrink-0 size-4"
-                    aria-label="Edit or delete event"
-                  />
-                  <span className="sr-only">Edit or delete event</span>
-                </Button>
-              </EditDialogTrigger>
-              <div className="space-y-4">
-                <div className="flex items-center">
-                  <div className="flex-1">
-                    <p className="bg-gray-200 text-stone-700 font-semibold py-1 w-fit rounded-full px-4 text-sm">
-                      {event.price === 0 ? (
-                        "Free"
-                      ) : (
-                        <>${new Decimal(event.price).div(100).toNumber()}</>
-                      )}
-                    </p>
+                  {event.title}
+                </h2>
+                <EditDialogTrigger event={event}>
+                  <Button
+                    type="button"
+                    className={button({
+                      class: "absolute -top-4 right-2 z-10",
+                    })}
+                  >
+                    <SettingsIcon
+                      className="shrink-0 size-4"
+                      aria-label="Edit or delete event"
+                    />
+                    <span className="sr-only">Edit or delete event</span>
+                  </Button>
+                </EditDialogTrigger>
+                <div className="space-y-4">
+                  <div className="flex items-center">
+                    <div className="flex-1">
+                      <p className="bg-gray-200 text-stone-700 font-semibold py-1 w-fit rounded-full px-4 text-sm">
+                        {event.price === 0 ? (
+                          "Free"
+                        ) : (
+                          <>${new Decimal(event.price).div(100).toNumber()}</>
+                        )}
+                      </p>
+                    </div>
+                    <EventStatusBadge status={event.status} />
                   </div>
-                  <EventStatusBadge status={event.status} />
-                </div>
-                <div className="flex">
-                  <div className="flex-1">
-                    <p className="font-semibold">Start Date</p>
-                    <time className="inline-flex gap-1 items-center text-sm">
-                      <ClockIcon className="shrink-0 size-4" aria-label="" />
-                      {formatDate(event.startDate)}
-                    </time>
+                  <div className="flex">
+                    <div className="flex-1">
+                      <p className="font-semibold">Start Date</p>
+                      <time className="inline-flex gap-1 items-center text-sm">
+                        <ClockIcon className="shrink-0 size-4" aria-label="" />
+                        {formatDate(Number(event.startDate))}
+                      </time>
+                    </div>
+                    <div>
+                      <p className="font-semibold">End Date</p>
+                      <time className="inline-flex gap-1 items-center text-sm">
+                        <ClockIcon className="shrink-0 size-4" aria-label="" />
+                        {formatDate(Number(event.endDate))}
+                      </time>
+                    </div>
                   </div>
-                  <div>
-                    <p className="font-semibold">End Date</p>
-                    <time className="inline-flex gap-1 items-center text-sm">
-                      <ClockIcon className="shrink-0 size-4" aria-label="" />
-                      {formatDate(event.endDate)}
-                    </time>
-                  </div>
+
+                  <Link
+                    className={button({ class: "flex" })}
+                    to={`/events/${event.id}`}
+                  >
+                    View event details
+                  </Link>
                 </div>
               </div>
-            </div>
-          );
-        })}
+            );
+          }
+        )}
       </div>
     </div>
   );
@@ -115,7 +138,9 @@ export function HomePage() {
 function EditDialogTrigger({
   children,
   event,
-}: PropsWithChildren<{ event: z.infer<typeof eventUpdateSchema> }>) {
+}: PropsWithChildren<{
+  event: Event & { status: "started" | "completed" | "paused" };
+}>) {
   const toastUpdateId = "event:edit";
   const toastDeleteId = "event:delete";
 
@@ -219,14 +244,13 @@ function EditDialogTrigger({
   });
 
   return (
-    <DialogTrigger isOpen={isOpen} onOpenChange={(open) => setIsOpen(open)}>
+    <DialogTrigger onOpenChange={setIsOpen} isOpen={isOpen}>
       {children}
       <ModalOverlay
         isDismissable
-        onOpenChange={setIsOpen}
         className="bg-black/50 absolute top-0 z-10 w-dvw h-dvh grid place-items-center"
       >
-        <Modal onOpenChange={setIsOpen} className="relative">
+        <Modal className="relative">
           <Dialog className="bg-white shadow-lg w-96 rounded-md focus:outline-none p-4 grid grid-rows-[auto,1fr,auto] gap-2">
             {({ close }) => (
               <>
@@ -298,14 +322,20 @@ function EditDialogTrigger({
                         <Controller
                           control={form.control}
                           name="title"
-                          render={({ field }) => {
+                          render={({ field, fieldState }) => {
                             return (
                               <div className="space-y-1">
                                 <Label className="font-semibold w-full">
                                   Title
                                 </Label>
                                 <Input
-                                  className="w-full border px-1.5 py-2 rounded-md focus:outline-none"
+                                  className={cn(
+                                    input(),
+                                    fieldState.error
+                                      ? "border-red-300 focus:ring-red-300"
+                                      : "border-gray-200 focus:ring-blue-300"
+                                  )}
+                                  placeholder="Titlte"
                                   {...field}
                                 />
                               </div>
@@ -315,29 +345,36 @@ function EditDialogTrigger({
                         <Controller
                           control={form.control}
                           name="price"
-                          render={({ field }) => {
+                          render={({ field, fieldState }) => {
                             return (
-                              <div className="space-y-1">
+                              <div className="space-y-2">
                                 <Label
                                   htmlFor={field.name}
                                   className="font-semibold w-full"
                                 >
                                   Price
                                 </Label>
-                                <Input
-                                  type="number"
-                                  className="w-full border px-1.5 py-2 rounded-md focus:outline-none"
-                                  placeholder="0.00"
-                                  {...field}
-                                  onChange={(e) => {
-                                    if (e.target.value.length === 0) {
-                                      form.setValue(field.name, 0);
-                                    }
+                                <div className="space-y-1">
+                                  <Input
+                                    type="number"
+                                    className={input()}
+                                    placeholder="0.00"
+                                    {...field}
+                                    onChange={(e) => {
+                                      if (e.target.value.length === 0) {
+                                        form.setValue(field.name, 0);
+                                      }
 
-                                    const value = parseFloat(e.target.value);
-                                    form.setValue(field.name, value);
-                                  }}
-                                />
+                                      const value = parseFloat(e.target.value);
+                                      form.setValue(field.name, value);
+                                    }}
+                                  />
+                                  {fieldState.error && (
+                                    <p className="text-red-500 text-sm italic">
+                                      {fieldState.error.message}
+                                    </p>
+                                  )}
+                                </div>
                               </div>
                             );
                           }}
@@ -453,7 +490,7 @@ function EditDialogTrigger({
                           close();
                         }
                       }}
-                      className="bg-red-500 text-white px-4 py-2 rounded-md"
+                      className={button({ variant: "danger" })}
                     >
                       Delete
                     </Button>

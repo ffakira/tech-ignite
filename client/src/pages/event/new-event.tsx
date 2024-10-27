@@ -9,6 +9,7 @@ import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { useCreateEventMutation } from "@/lib/mutations/event.mutation";
 import { CalendarPicker } from "@/components/calendar-picker";
+import { input } from "@/components/ui/input";
 
 export function NewEventPage() {
   const toastId = "event:created";
@@ -70,7 +71,7 @@ export function NewEventPage() {
                   <div className="space-y-1">
                     <Input
                       className={cn(
-                        "w-full border focus:outline-none py-1.5 px-2 rounded-md focus:ring-1",
+                        input(),
                         fieldState.error
                           ? "border-red-300 focus:ring-red-300"
                           : "border-gray-200 focus:ring-blue-300"

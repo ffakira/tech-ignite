@@ -1,15 +1,20 @@
 import { useQuery } from "@tanstack/react-query";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { useEventQuery } from "@/lib/queries/event.query";
 import { formatDate } from "@/lib/utils";
 import Decimal from "decimal.js";
 import { ClockIcon } from "lucide-react";
 import { EventStatusBadge } from "@/components/event-status-badge";
+import { Button } from "react-aria-components";
+import { button } from "@/components/ui/button";
 
 export function EventPage() {
   const { eventId } = useParams<{ eventId: string }>();
+  const navigate = useNavigate();
   const id = Number(eventId);
 
+  // @TODO add types on useQuery return types
+  /* eslint-disable  @typescript-eslint/no-explicit-any */
   const result: any = useQuery({
     ...useEventQuery(id),
     enabled: !isNaN(id),
@@ -36,7 +41,15 @@ export function EventPage() {
   if (!event) {
     return (
       <div>
-        <p>Event not found</p>
+        <h1 className="font-semibold text-stone-700 text-2xl">
+          Event not found
+        </h1>
+        <Button
+          className={button({ variant: "secondary" })}
+          onPress={() => navigate(-1)}
+        >
+          Go back
+        </Button>
       </div>
     );
   }
@@ -48,7 +61,7 @@ export function EventPage() {
         <EventStatusBadge status={event.status} />
       </div>
       <p className="flex gap-1.5">
-        <span className="text-stone-700">Price:</span>
+        <span className="text-stone-700 font-semibold">Price:</span>
         {event.price === 0 ? (
           "Free"
         ) : (

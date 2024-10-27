@@ -36,7 +36,7 @@ export function useEventsQuery(options?: QueryOptions) {
     queryFn: async () => {
       try {
         const response = await fetch(
-          `${import.meta.env.VITE_API_V1_URL}/events`,
+          `${import.meta.env.VITE_API_V1_URL}/events/`,
           {
             method: "GET",
             headers: {
@@ -45,15 +45,20 @@ export function useEventsQuery(options?: QueryOptions) {
           }
         );
 
-        if (!response.ok) {
-          return { status: "error", errors: ["An error occurred"] } as const;
+        const data = await response.json();
+
+        if (data.status === 404) {
+          return { status: "error", errors: ["No data"], data: [] } as const;
         }
 
-        const data = await response.json();
-        console.log(data);
         return { status: "success", data } as const;
       } catch (error) {
-        return { status: "error", errors: ["Internal server error"] } as const;
+        console.error(error);
+        return {
+          status: "error",
+          errors: ["Internal server error"],
+          data: [],
+        } as const;
       }
     },
     ...options,
