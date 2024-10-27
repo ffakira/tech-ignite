@@ -1,5 +1,6 @@
 package so.akira.events.controllers;
 
+import org.jooq.exception.NoDataFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -25,9 +26,14 @@ public class EventController {
         this.eventService = eventService;
     }
 
-    @GetMapping("")
+    @GetMapping("/")
     public ResponseEntity<?> getEvents() {
-        return ResponseEntity.status(HttpStatus.OK).body(eventService.getEvents());
+        try {
+            return ResponseEntity.status(HttpStatus.OK).body(eventService.getEvents());
+        } catch (NoDataFoundException e) {
+            StatusResponse statusResponse = new StatusResponse("error", e.getMessage());
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(statusResponse);
+        }
     }
 
     @GetMapping("/{id}")
