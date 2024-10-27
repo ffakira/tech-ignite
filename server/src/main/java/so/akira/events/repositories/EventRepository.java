@@ -11,7 +11,7 @@ import org.sqlite.SQLiteErrorCode;
 import org.sqlite.SQLiteException;
 
 import so.akira.events.exceptions.SQLConstraintViolationException;
-import so.akira.events.models.EventModel;
+import so.akira.events.models.Event;
 
 import static so.akira.events.db.tables.Events.EVENTS;
 
@@ -28,11 +28,11 @@ public class EventRepository {
         this.db = db;
     }
 
-    public EventModel getEventById(int id) throws NoDataFoundException {
+    public Event getEventById(int id) throws NoDataFoundException {
         try {
-            EventModel event = db.selectFrom(EVENTS)
+            Event event = db.selectFrom(EVENTS)
                     .where(EVENTS.ID.eq(id)).limit(1)
-                    .fetchOneInto(EventModel.class);
+                    .fetchOneInto(Event.class);
             if (event == null) {
                 throw new NoDataFoundException("No event found with id: " + id);
             }
@@ -42,11 +42,11 @@ public class EventRepository {
         }
     }
 
-    public List<EventModel> getEvents() throws NoDataFoundException {
+    public List<Event> getEvents() throws NoDataFoundException {
         try {
-            List<EventModel> events = db.selectFrom(EVENTS)
+            List<Event> events = db.selectFrom(EVENTS)
                     .limit(20)
-                    .fetchInto(EventModel.class);
+                    .fetchInto(Event.class);
 
             if (events.isEmpty()) {
                 throw new NoDataFoundException("No events found");
@@ -58,7 +58,7 @@ public class EventRepository {
         }
     }
 
-    public void insertEvent(EventModel event) throws SQLIntegrityConstraintViolationException {
+    public void insertEvent(Event event) throws SQLIntegrityConstraintViolationException {
         try {
             db.insertInto(EVENTS, EVENTS.TITLE, EVENTS.PRICE, EVENTS.START_DATE, EVENTS.END_DATE)
                     .values(event.getTitle(), event.getPrice(), event.getStartDate(), event.getEndDate())
@@ -74,7 +74,7 @@ public class EventRepository {
         }
     }
 
-    public void updateEvent(int id, EventModel event) throws SQLIntegrityConstraintViolationException {
+    public void updateEvent(int id, Event event) throws SQLIntegrityConstraintViolationException {
         try {
             logger.debug("Updating event with id: {}", id);
             db.update(EVENTS)

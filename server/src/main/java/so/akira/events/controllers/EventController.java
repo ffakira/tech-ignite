@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import so.akira.events.models.StatusResponse;
-import so.akira.events.models.EventModel;
+import so.akira.events.models.Event;
 import so.akira.events.services.EventService;
 
 @RestController
@@ -43,18 +43,18 @@ public class EventController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(statusResponse);
         }
 
-        EventModel event = eventService.getEventById(id);
+        Event event = eventService.getEventById(id);
         return ResponseEntity.status(HttpStatus.OK).body(event);
     }
 
     @PostMapping("/new")
-    public ResponseEntity<?> createEvent(@RequestBody EventModel event) {
+    public ResponseEntity<?> createEvent(@RequestBody Event event) {
         eventService.insertEvent(event);
         return ResponseEntity.status(HttpStatus.CREATED).body(event);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<?> updateEvent(@PathVariable int id, @RequestBody EventModel event) {
+    public ResponseEntity<?> updateEvent(@PathVariable int id, @RequestBody Event event) {
         if (id <= 0) {
             StatusResponse statusResponse = new StatusResponse("error", "Invalid ID params");
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(statusResponse);

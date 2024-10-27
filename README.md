@@ -18,7 +18,7 @@ $ vim ./client/.env.local
 $ docker compose up
 ```
 
-# `.env.local` file
+`.env.local` file
 ```
 NODE_ENV=dev
 VITE_API_V1_URL=http://localhost:8080/api/v1
@@ -90,7 +90,7 @@ export const eventSchema = baseEventSchema.refine(
 
 Run in development mode
 ```
-$ bun dev
+$ bun run dev
 
 # In the case if the environment files are not being expoed
 $ bun --bun dev

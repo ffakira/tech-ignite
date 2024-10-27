@@ -9,7 +9,7 @@ import org.springframework.stereotype.Service;
 
 import so.akira.events.exceptions.NoDataFoundException;
 import so.akira.events.exceptions.SQLConstraintViolationException;
-import so.akira.events.models.EventModel;
+import so.akira.events.models.Event;
 import so.akira.events.repositories.EventRepository;
 
 @Service
@@ -20,7 +20,7 @@ public class EventService {
     @Autowired
     private EventRepository eventRepository;
 
-    public EventModel getEventById(int id) {
+    public Event getEventById(int id) {
         try {
             return eventRepository.getEventById(id);
         } catch (NoDataFoundException e) {
@@ -30,7 +30,7 @@ public class EventService {
         }
     }
 
-    public Iterable<EventModel> getEvents() {
+    public Iterable<Event> getEvents() {
         try {
             return eventRepository.getEvents();
         } catch (NoDataFoundException e) {
@@ -40,7 +40,7 @@ public class EventService {
         }
     }
 
-    public void insertEvent(EventModel event) {
+    public void insertEvent(Event event) {
         try {
             eventRepository.insertEvent(event);
         } catch (SQLIntegrityConstraintViolationException e) {
@@ -50,7 +50,7 @@ public class EventService {
         }
     }
 
-    public void updateEvent(int id, EventModel event) {
+    public void updateEvent(int id, Event event) {
         try {
             logger.debug("Updating event with id: {}", id);
             eventRepository.updateEvent(id, event);
