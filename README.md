@@ -2,19 +2,26 @@
 
 ## Getting started
 
-1. Rename inside the `client` folder: 
-  * `.env.example` to `.env.local`
+```sh
+# clone project
+$ git clone https://github.com/ffakira/tech-ignite
+$ cd tech-ignite
 
+# rename .env.example to .env.local
+$ mv ./client/.env.example ./client/.env.local
+
+# fill in NODE_ENV and VITE_API_V1_URL values (assuming you're using vim)
+$ vim ./client/.env.local
+
+# After updating, and on root project run docker compose up
+# Tested with Ubuntu 24.04 and Ubuntu 22.04.2
+$ docker compose up
+```
+
+# `.env.local` file
 ```
 NODE_ENV=dev
 VITE_API_V1_URL=http://localhost:8080/api/v1
-```
-
-2. Back to the root project, where `docker-compose.yml` is located, and
-run the following command
-
-```
-docker compose up 
 ```
 
 ## Assumptions
@@ -105,6 +112,18 @@ The decision for going unconventional approach, allows to debug the component ea
 
 ## Server
 
+Run in development mode
+```
+# run migration files needs to be run first, in order for JOOQ to generate the code
+$ flyway migrate:run
+
+# generate JOOQ
+$ mvn clean generate-sources
+
+# run spring boot (pom.xml will automatically handle generating the JOOQ)
+mvn spring-boot:run
+```
+
 ### Folder structure
 * `config` contains configuration files for boostraping Srping app
 * `controllers` contains the RESTful api
@@ -134,8 +153,6 @@ The decision for going unconventional approach, allows to debug the component ea
 </profiles>
 
 * `createdAt`, `updatedAt`, `startDate` and `endDate` currently is set to `int` which will cause an int overflow, from Y2k38 bug, when time reaches on ~Jan 2038. A simple fix, is to use `long` instead of `int`.
-
-* A better docker build, instead of creating flyway migrations and generate JOOQ outside of docker container.
 ```
 
 ### API Documentation
