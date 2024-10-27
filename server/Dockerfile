@@ -1,8 +1,6 @@
 # build stage: setup jdk 21, install maven and download dependencies
-FROM eclipse-temurin:21-jdk AS build
+FROM jelastic/maven:3.9.5-openjdk-21 AS build
 WORKDIR /app
-
-RUN apt-get update && apt-get install -y maven
 
 COPY pom.xml .
 RUN mvn dependency:go-offline
@@ -12,7 +10,7 @@ FROM build AS migrate
 WORKDIR /app
 
 # optional: to install sqlite3, allows to access the database
-RUN apt-get update && apt-get install -y sqlite3
+# RUN apt-get update && apt-get install -y sqlite3
 
 # [!] attach the volume to the container, to ensure the data is persisted
 # and apply migrations to the database

@@ -105,26 +105,6 @@ The decision for going unconventional approach, allows to debug the component ea
 
 ## Server
 
-### Setting up the server
-```
-# Ensure you are inside the server folder
-
-# If data folder does exists inside the server folder
-$ mkdir -p data
-
-# Clean up anything
-$ mvn clean
-
-# Apply migrations from database
-$ mvn flyway:migrate
- 
-# Create jar file
-$ mvn package -DskipTests
-
-# You can 
-$ java -jar target/events-0.0.1-SNAPSHOT.jar --spring.profiles.active=dev
-```
-
 ### Folder structure
 * `config` contains configuration files for boostraping Srping app
 * `controllers` contains the RESTful api
