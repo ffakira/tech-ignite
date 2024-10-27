@@ -15,7 +15,6 @@ WORKDIR /app
 # [!] attach the volume to the container, to ensure the data is persisted
 # and apply migrations to the database
 RUN mkdir -p /app/data
-VOLUME /app/data
 
 COPY --from=build /app/pom.xml . 
 COPY src/main/resources/db /app/src/main/resources/db
