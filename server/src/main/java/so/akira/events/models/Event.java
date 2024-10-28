@@ -30,11 +30,8 @@ public class Event {
     @Positive(message = "endDate must be a positive number")
     private int endDate;
 
-    @Positive(message = "createdAt must be a positive number")
-    private Integer createdAt;
-
-    @Positive(message = "updatedAt must be a positive number")
-    private Integer updatedAt;
+    private int createdAt;
+    private int updatedAt;
 
     public Event() {
     }

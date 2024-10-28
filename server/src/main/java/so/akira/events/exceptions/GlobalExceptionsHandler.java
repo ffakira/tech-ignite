@@ -32,8 +32,8 @@ public class GlobalExceptionsHandler {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(statusResponse);
     }
 
-    @ExceptionHandler(NoDataFoundException.class)
-    public ResponseEntity<StatusResponse> handleNoDataFoundException(NoDataFoundException e) {
+    @ExceptionHandler(CustomNoDataFoundException.class)
+    public ResponseEntity<StatusResponse> handleNoDataFoundException(CustomNoDataFoundException e) {
         StatusResponse statusResponse = new StatusResponse("error", e.getMessage(), null, new Object[0]);
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(statusResponse);
     }

@@ -1,6 +1,5 @@
 package so.akira.events.controllers;
 
-import org.jooq.exception.NoDataFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -17,6 +16,7 @@ import jakarta.validation.Valid;
 import so.akira.events.models.StatusResponse;
 import so.akira.events.models.Event;
 import so.akira.events.services.EventService;
+import so.akira.events.exceptions.CustomNoDataFoundException;
 
 @RestController
 @RequestMapping("/api/v1/events")
@@ -33,7 +33,7 @@ public class EventController {
     public ResponseEntity<?> getEvents() {
         try {
             return ResponseEntity.status(HttpStatus.OK).body(eventService.getEvents());
-        } catch (NoDataFoundException e) {
+        } catch (CustomNoDataFoundException e) {
             StatusResponse statusResponse = new StatusResponse("error", e.getMessage());
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(statusResponse);
         }
@@ -49,7 +49,7 @@ public class EventController {
         try {
             Event event = eventService.getEventById(id);
             return ResponseEntity.status(HttpStatus.OK).body(event);
-        } catch (NoDataFoundException e) {
+        } catch (CustomNoDataFoundException e) {
             StatusResponse statusResponse = new StatusResponse("error", "Event not found", null, new Object[0]);
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(statusResponse);
         }
@@ -71,7 +71,7 @@ public class EventController {
         try {
             eventService.updateEvent(id, event);
             return ResponseEntity.status(HttpStatus.OK).body(event);
-        } catch (NoDataFoundException e) {
+        } catch (CustomNoDataFoundException e) {
             StatusResponse statusResponse = new StatusResponse("error", "Event not found", null, new Object[0]);
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(statusResponse);
         }
@@ -88,7 +88,7 @@ public class EventController {
             eventService.deleteEvent(id);
             StatusResponse statusResponse = new StatusResponse("success", "Event deleted successfully");
             return ResponseEntity.status(HttpStatus.OK).body(statusResponse);
-        } catch (NoDataFoundException e) {
+        } catch (CustomNoDataFoundException e) {
             StatusResponse statusResponse = new StatusResponse("error", "Event not found", null, new Object[0]);
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(statusResponse);
         }
