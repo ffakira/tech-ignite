@@ -1,6 +1,7 @@
 package so.akira.events.models;
 
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.Size;
@@ -11,12 +12,12 @@ import so.akira.events.validators.event.ValidStartDate;
 public class Event {
     private int id;
 
+    @NotNull(message = "title is required")
+    @NotBlank(message = "title is required")
     @Size(min = 3, max = 255, message = "title must be between 3 and 255 characters")
     private String title;
 
-    @NotBlank(message = "price is required")
     @Positive(message = "price must be a positive number")
-    @Pattern(regexp = "^[0-9]*$", message = "Price must be in cents")
     private int price;
 
     @Pattern(regexp = "^(completed|paused|started)$", message = "Status must be one of: completed, paused, started")
@@ -30,10 +31,10 @@ public class Event {
     private int endDate;
 
     @Positive(message = "createdAt must be a positive number")
-    private int createdAt;
+    private Integer createdAt;
 
     @Positive(message = "updatedAt must be a positive number")
-    private int updatedAt;
+    private Integer updatedAt;
 
     public Event() {
     }

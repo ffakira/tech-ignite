@@ -22,30 +22,39 @@ public class EventService {
 
     public Event getEventById(int id) {
         try {
+            logger.debug("Fetching event with id: {}", id);
             return eventRepository.getEventById(id);
         } catch (NoDataFoundException e) {
+            logger.error("No event found with id: {}", id, e);
             throw new NoDataFoundException("No event found", e);
         } catch (Exception e) {
+            logger.error("An error occured while fetching an event with id: {}", id, e);
             throw new RuntimeException("An error occured while fetching an event", e);
         }
     }
 
     public Iterable<Event> getEvents() {
         try {
+            logger.debug("Fetching events");
             return eventRepository.getEvents();
         } catch (NoDataFoundException e) {
+            logger.error("No events found", e);
             throw new NoDataFoundException("No events found", e);
         } catch (Exception e) {
+            logger.error("An error occured while fetching events", e);
             throw new RuntimeException("An error occured while fetching events", e);
         }
     }
 
     public void insertEvent(Event event) {
         try {
+            logger.debug("Inserting event: {}", event);
             eventRepository.insertEvent(event);
         } catch (SQLIntegrityConstraintViolationException e) {
+            logger.error("An error occured while inserting an event", e);
             throw new SQLConstraintViolationException("An error occured while inserting an event", e);
         } catch (Exception e) {
+            logger.error("An error occured while inserting an event", e);
             throw new RuntimeException("An error occured while inserting an event", e);
         }
     }
@@ -55,15 +64,24 @@ public class EventService {
             logger.debug("Updating event with id: {}", id);
             eventRepository.updateEvent(id, event);
         } catch (SQLIntegrityConstraintViolationException e) {
+            logger.error("No event found with id: {}", id);
             throw new SQLConstraintViolationException("An error occured while updating an event", e);
+        } catch (NoDataFoundException e) {
+            logger.error("An error occured while updating an event with id: {}", id, e);
+            throw new NoDataFoundException("An error occured while updating an event", e);
         } catch (Exception e) {
+            logger.error("An error occured while updating an event with id: {}", id, e);
             throw new RuntimeException("An error occured while updating an event", e);
         }
     }
 
     public void deleteEvent(int id) {
         try {
+            logger.debug("Deleting event with id: {}", id);
             eventRepository.deleteEvent(id);
+        } catch (NoDataFoundException e) {
+            logger.error("No event found with id: {}", id);
+            throw new NoDataFoundException("No event found with id: " + id, e);
         } catch (Exception e) {
             throw new RuntimeException("An error occured while deleting an event", e);
         }
