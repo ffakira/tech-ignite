@@ -2,6 +2,7 @@ import { z } from "zod";
 import { parseDateString } from "@/lib/utils";
 
 export const baseEventSchema = z.object({
+  id: z.number().optional(),
   title: z
     .string()
     .min(3, { message: "Title is too short, minimum 3 characters" })
@@ -28,7 +29,7 @@ export const baseEventSchema = z.object({
         return date !== false;
       },
       {
-        message: "Invalid date format, must be in the format dd/mm/yyyy",
+        message: "Invalid date format, must be in the format dd>/mm/yyyy",
         path: ["startDate"],
       }
     ),

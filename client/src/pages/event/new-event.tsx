@@ -10,9 +10,11 @@ import { cn } from "@/lib/utils";
 import { useCreateEventMutation } from "@/lib/mutations/event.mutation";
 import { CalendarPicker } from "@/components/calendar-picker";
 import { input } from "@/components/ui/input";
+import { useNavigate } from "react-router-dom";
 
 export function NewEventPage() {
   const toastId = "event:created";
+  const navigate = useNavigate();
 
   const createEventMutation = useCreateEventMutation();
 
@@ -29,17 +31,17 @@ export function NewEventPage() {
 
   const submit = form.handleSubmit((data) => {
     // Handle form submission
-    console.log("test", data);
-
     createEventMutation.mutate(data, {
       onSuccess: (data) => {
-        console.log(data);
+        console.log("", data.data);
         form.reset();
 
         toast.success("Event created successfully", {
           id: toastId,
           duration: 3000,
         });
+
+        navigate(`/events/${data.data.id}`);
       },
       onError: (error) => {
         console.error(error);
